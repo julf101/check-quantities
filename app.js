@@ -5,7 +5,10 @@ const stockController = require('./controllers/stockController');
 const logger = require('./utils/logger');
 const db = require('./config/database');
 
+
 const app = express();
+
+console.log('Starting application...');
 
 // Middleware
 app.use(bodyParser.json());
