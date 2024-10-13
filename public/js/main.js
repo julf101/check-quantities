@@ -41,10 +41,6 @@ function stockChecker() {
             this.selectedItem = this.stockInfo.find(item => item.characteristicValueForMainSizesOfVariantsId === size);
         },
 
-        clearUrl() {
-            this.url = '';
-        },
-
         clearAll() {
             this.url = '';
             this.stockInfo = [];
