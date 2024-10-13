@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "import-atp": "node scripts/importAtp.js"
+    "import-atp": "node scripts/importAtp.js",
+    "start": "node app.js"
   },
   "keywords": [],
   "author": "",
