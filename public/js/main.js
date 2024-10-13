@@ -3,17 +3,13 @@ function stockChecker() {
         url: '',
         stockInfo: [],
         selectedSize: null,
-        quantity: 1,
-        availableQuantity: 0,
-        error: null,
         selectedItem: null,
+        error: null,
 
         async checkStock() {
             this.error = null;
             this.stockInfo = [];
             this.selectedSize = null;
-            this.quantity = 1;
-            this.availableQuantity = 0;
             this.selectedItem = null;
 
             try {
@@ -40,33 +36,21 @@ function stockChecker() {
             }
         },
 
-        async selectSize(size) {
+        selectSize(size) {
             this.selectedSize = size;
             this.selectedItem = this.stockInfo.find(item => item.characteristicValueForMainSizesOfVariantsId === size);
+        },
 
-            try {
-                const response = await fetch('/get-quantity', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        materialNumberId: this.selectedItem.materialNumberId,
-                        size: size,
-                    }),
-                });
+        clearUrl() {
+            this.url = '';
+        },
 
-                if (!response.ok) {
-                    throw new Error('Failed to get quantity');
-                }
-
-                const data = await response.json();
-                this.availableQuantity = data.quantity;
-                this.quantity = Math.min(1, this.availableQuantity);
-            } catch (error) {
-                console.error('Error:', error);
-                this.error = 'An error occurred while getting quantity';
-            }
+        clearAll() {
+            this.url = '';
+            this.stockInfo = [];
+            this.selectedSize = null;
+            this.selectedItem = null;
+            this.error = null;
         },
 
         copyToClipboard(text) {

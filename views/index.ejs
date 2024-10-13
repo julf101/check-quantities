@@ -1,22 +1,133 @@
-<div x-data="stockChecker()" class="max-w-2xl mx-auto">
-    <h1 class="text-3xl font-bold mb-6 text-center">Stock Checker</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div x-data="stockChecker()" class="max-w-3xl mx-auto p-4">
+
+</html>
+    <h1 class="text-3xl font-bold mb-8 text-center">Stock Checker</h1>
     
     <form @submit.prevent="checkStock" class="mb-8">
-        <div class="flex items-center">
+        <div class="flex flex-col sm:flex-row items-center gap-4">
             <input 
                 type="text" 
                 x-model="url" 
                 placeholder="Enter product URL" 
-                class="flex-grow p-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="flex-grow p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             >
-            <button 
-                type="submit" 
-                class="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-                Check Stock
-            </button>
+            <div class="flex gap-2 w-full sm:w-auto">
+                <button 
+                    type="submit" 
+                    class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow sm:flex-grow-0"
+                >
+                    Check Stock
+                </button>
+                <button 
+                    @click="clearUrl" 
+                    type="button" 
+                    class="bg-gray-300 text-gray-700 px-6 py-3 rounded hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 flex-grow sm:flex-grow-0"
+                >
+                    Clear
+                </button>
+            </div>
         </div>
     </form>
 
-    <!-- Rest of the content remains the same -->
+    <div x-show="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+        <p x-text="error"></p>
+        <button @click="clearAll" class="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">OK</button>
+    </div>
+
+    <div x-show="stockInfo.length > 0" class="bg-white shadow-md rounded p-6">
+        <h2 class="text-xl font-semibold mb-4">Available Sizes</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
+            <template x-for="item in stockInfo" :key="item.materialNumberId">
+                <button 
+                    @click="selectSize(item.characteristicValueForMainSizesOfVariantsId)"
+                    class="p-2 border rounded hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    :class="{'bg-blue-500 text-white': selectedSize === item.characteristicValueForMainSizesOfVariantsId}"
+                    x-text="item.characteristicValueForMainSizesOfVariantsId"
+                ></button>
+            </template>
+        </div>
+
+        <div x-show="selectedItem" class="space-y-4">
+            <div class="flex items-center">
+                <span class="font-semibold mr-2">Material Number ID:</span>
+                <span x-text="selectedItem.materialNumberId"></span>
+                <button @click="copyToClipboard(selectedItem.materialNumberId)" class="ml-2 text-blue-500 hover:text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                    </svg>
+                </button>
+            </div>
+            <div class="flex items-center">
+                <span class="font-semibold mr-2">Material Number Text:</span>
+                <span x-text="selectedItem.materialNumberText"></span>
+                <button @click="copyToClipboard(selectedItem.materialNumberText)" class="ml-2 text-blue-500 hover:text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                    </svg>
+                </button>
+            </div>
+            <div class="flex items-center">
+                <span class="font-semibold mr-2">Color:</span>
+                <span x-text="selectedItem.colorNrfColorCode"></span>
+                <button @click="copyToClipboard(selectedItem.colorNrfColorCode)" class="ml-2 text-blue-500 hover:text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                    </svg>
+                </button>
+            </div>
+            <div class="flex items-center">
+                <span class="font-semibold mr-2">Size:</span>
+                <span x-text="selectedItem.characteristicValueForMainSizesOfVariantsId"></span>
+                <button @click="copyToClipboard(selectedItem.characteristicValueForMainSizesOfVariantsId)" class="ml-2 text-blue-500 hover:text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                    </svg>
+                </button>
+            </div>
+            <div class="flex items-center">
+                <span class="font-semibold mr-2">Quantity:</span>
+                <span x-text="selectedItem.atpCurrentWeek30plus"></span>
+                <button @click="copyToClipboard(selectedItem.atpCurrentWeek30plus)" class="ml-2 text-blue-500 hover:text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                    </svg>
+                </button>
+            </div>
+            <div class="flex items-center">
+                <span class="font-semibold mr-2">URL:</span>
+                <span x-text="url"></span>
+                <button @click="copyToClipboard(url)" class="ml-2 text-blue-500 hover:text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                    </svg>
+                </button>
+            </div>
+            <div>
+                <span class="font-semibold">Product Image:</span>
+                <img :src="selectedItem.lotLogoFullbleedDesktop" alt="Product Image" class="mt-2 max-w-full h-auto">
+            </div>
+        </div>
+    </div>
 </div>
+
+        </div>
+    </div>
+    <script src="/js/main.js"></script>
+</body>
