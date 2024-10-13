@@ -1,5 +1,5 @@
 const express = require('express');
-const bodyParser = require('body-parser'); // Add this line
+const bodyParser = require('body-parser');
 const path = require('path');
 const stockController = require('./controllers/stockController');
 const logger = require('./utils/logger');

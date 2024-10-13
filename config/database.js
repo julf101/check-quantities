@@ -1,8 +1,10 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const logger = require('./logger');
+const logger = require('../utils/logger');
 
-const dbPath = path.resolve(__dirname, '../stock.db');
+const dbPath = process.env.NODE_ENV === 'production'
+  ? '/tmp/stock.db'
+  : path.join(__dirname, '..', 'stock.db');
 
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
