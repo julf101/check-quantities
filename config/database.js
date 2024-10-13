@@ -16,9 +16,20 @@ const db = new sqlite3.Database(dbPath, (err) => {
 function createTable() {
   db.run(`CREATE TABLE IF NOT EXISTS stock (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    material_number_id TEXT,
-    characteristic_value TEXT,
-    quantity INTEGER
+    brandId TEXT,
+    plant TEXT,
+    crossPlantConfigurableMaterial TEXT,
+    style TEXT,
+    materialNumberId TEXT,
+    materialNumberText TEXT,
+    colorNrfColorCode TEXT,
+    characteristicValueForMainSizesOfVariantsId TEXT,
+    fashionInformationField1 TEXT,
+    hs2ProductCategory TEXT,
+    brandTerritory TEXT,
+    lastSeasonYearSeasonEMEA TEXT,
+    lotLogoFullbleedDesktop TEXT,
+    atpCurrentWeek30plus INTEGER
   )`, (err) => {
     if (err) {
       logger.error('Error creating table', err);
