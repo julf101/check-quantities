@@ -1,4 +1,4 @@
-const db = require('../config/database');
+const { getDatabase } = require('../config/database');
 const logger = require('../utils/logger');
 
 function parseUrl(url) {
@@ -18,13 +18,28 @@ function parseUrl(url) {
   return { articleCode, colorCode };
 }
 
+function logSampleData() {
+  const db = getDatabase();
+  return new Promise((resolve, reject) => {
+    db.all('SELECT * FROM stock LIMIT 5', (err, rows) => {
+      if (err) {
+        logger.error('Error fetching sample data:', err);
+        reject(err);
+      } else {
+        logger.info('Sample data:', rows);
+        resolve(rows);
+      }
+    });
+  });
+}
+
 exports.getStockInfo = async (url) => {
-  logSampleData();
+  const db = getDatabase();
+  await logSampleData();
   logger.info(`Checking stock for URL: ${url}`);
   const { articleCode, colorCode } = parseUrl(url);
   logger.info(`Parsed URL - Article Code: ${articleCode}, Color Code: ${colorCode}`);
 
-  // Construct the material ID by concatenating article code and color code
   const materialId = `${articleCode}${colorCode}`;
   logger.info(`Constructed Material ID: ${materialId}`);
 
@@ -51,6 +66,7 @@ exports.getStockInfo = async (url) => {
 };
 
 exports.getQuantity = async (materialNumberId, size) => {
+  const db = getDatabase();
   logger.info(`Getting quantity for materialNumberId: ${materialNumberId}, size: ${size}`);
   return new Promise((resolve, reject) => {
     const query = 'SELECT atpCurrentWeek30plus FROM stock WHERE materialNumberId = ? AND characteristicValueForMainSizesOfVariantsId = ?';
@@ -63,20 +79,8 @@ exports.getQuantity = async (materialNumberId, size) => {
         reject(err);
       } else {
         const quantity = row ? row.atpCurrentWeek30plus : 0;
-        logger.info(`Quantity found: ${quantity}`);
         resolve(quantity);
       }
     });
   });
 };
-
-function logSampleData() {
-  db.all('SELECT * FROM stock LIMIT 5', [], (err, rows) => {
-    if (err) {
-      logger.error('Error fetching sample data:', err);
-    } else {
-      logger.info('Sample data from stock table:');
-      rows.forEach(row => logger.info(JSON.stringify(row)));
-    }
-  });
-}

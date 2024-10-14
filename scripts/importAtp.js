@@ -6,7 +6,7 @@ const path = require('path');
 
 const csvFilePath = path.resolve(__dirname, 'ATP.csv');
 
-function deleteExistingRecords() {
+async function deleteExistingRecords(db) {
   return new Promise((resolve, reject) => {
     db.run('DELETE FROM stock', function(err) {
       if (err) {
@@ -20,7 +20,7 @@ function deleteExistingRecords() {
   });
 }
 
-function importData() {
+async function importData(db) {
   return new Promise((resolve, reject) => {
     let rowCount = 0;
     let lastRecord = null;
@@ -71,24 +71,17 @@ function importData() {
   });
 }
 
-async function main() {
+async function main(db) {
   try {
     logger.info('Starting import process');
-    const deletedCount = await deleteExistingRecords();
-    const { rowCount, lastRecord } = await importData();
+    const deletedCount = await deleteExistingRecords(db);
+    const { rowCount, lastRecord } = await importData(db);
     logger.info(`Import process completed. Deleted ${deletedCount} records, imported ${rowCount} records.`);
     logger.info('Last record imported:', JSON.stringify(lastRecord, null, 2));
   } catch (error) {
     logger.error('An error occurred during the import process:', error);
-  } finally {
-    db.close((err) => {
-      if (err) {
-        logger.error('Error closing database connection:', err);
-      } else {
-        logger.info('Database connection closed');
-      }
-    });
+    throw error;
   }
 }
 
-main();
+module.exports = main;
