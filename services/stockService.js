@@ -4,17 +4,27 @@ const logger = require('../utils/logger');
 function parseUrl(url) {
   logger.info(`Parsing URL: ${url}`);
   let articleCode, colorCode;
+
   if (url.includes('?color=')) {
     [articleCode, colorCode] = url.split('?color=');
     articleCode = articleCode.split('-').pop();
     logger.info(`URL parsed using '?color=' - Article Code: ${articleCode}, Color Code: ${colorCode}`);
   } else if (url.includes('?variationId=')) {
-    [articleCode, colorCode] = url.split('?variationId=');
+    [articleCode, variationPart] = url.split('?variationId=');
     articleCode = articleCode.split('-').pop();
-    logger.info(`URL parsed using '?variationId=' - Article Code: ${articleCode}, Color Code: ${colorCode}`);
+    
+    // Check if there's a color parameter after variationId
+    if (variationPart.includes('&color=')) {
+      [, colorCode] = variationPart.split('&color=');
+      logger.info(`URL parsed using '?variationId=' and '&color=' - Article Code: ${articleCode}, Color Code: ${colorCode}`);
+    } else {
+      colorCode = variationPart;
+      logger.info(`URL parsed using '?variationId=' - Article Code: ${articleCode}, Color Code: ${colorCode}`);
+    }
   } else {
     logger.warn(`URL does not contain expected parameters: ${url}`);
   }
+
   return { articleCode, colorCode };
 }
 
