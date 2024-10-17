@@ -3,9 +3,8 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const stockController = require('./controllers/stockController');
 const logger = require('./utils/logger');
-const { initializeDatabase, getDatabase } = require('./config/database');
+const { connectToDatabase } = require('./config/database');
 const importAtp = require('./scripts/importAtp');
-
 
 const app = express();
 
@@ -28,26 +27,19 @@ app.post('/get-quantity', stockController.getQuantity);
 const PORT = process.env.PORT || 3000;
 
 // Function to start the server
-// We define a startServer function to encapsulate the server start logic.
-const startServer = () => {
-  app.listen(PORT, () => {
-    logger.info(`Server running on port ${PORT}`);
-  });
-};
+async function startServer() {
+  try {
+    await connectToDatabase();
+    app.listen(PORT, () => {
+      logger.info(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
 
 // Initialize database and start server
-initializeDatabase()
-  .then(() => {
-    if (process.env.IMPORT_DATA === 'true') {
-      return importAtp(getDatabase());
-    }
-  })
-  .then(() => {
-    startServer();
-  })
-  .catch((error) => {
-    logger.error('Failed to initialize database or import data:', error);
-    process.exit(1);
-  });
+startServer();
 
 module.exports = app;

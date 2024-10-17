@@ -1,5 +1,6 @@
 const { getDatabase } = require('../config/database');
 const logger = require('../utils/logger');
+const Atp = require('../models/Atp');
 
 function parseUrl(url) {
   logger.info(`Parsing URL: ${url}`);
@@ -93,4 +94,14 @@ exports.getQuantity = async (materialNumberId, size) => {
       }
     });
   });
+};
+
+async function checkStock(materialNumberId) {
+  const stock = await Atp.findOne({ materialNumberId });
+  return stock ? stock.atpCurrentWeek30plus : 0;
+}
+
+module.exports = {
+  checkStock,
+  // ... other exported functions
 };
