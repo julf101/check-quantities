@@ -1,4 +1,3 @@
-const { getDatabase } = require('../config/database');
 const logger = require('../utils/logger');
 const Atp = require('../models/Atp');
 
@@ -29,23 +28,18 @@ function parseUrl(url) {
   return { articleCode, colorCode };
 }
 
-function logSampleData() {
-  const db = getDatabase();
-  return new Promise((resolve, reject) => {
-    db.all('SELECT * FROM stock LIMIT 5', (err, rows) => {
-      if (err) {
-        logger.error('Error fetching sample data:', err);
-        reject(err);
-      } else {
-        logger.info('Sample data:', rows);
-        resolve(rows);
-      }
-    });
-  });
+async function logSampleData() {
+  try {
+    const sampleData = await Atp.find().limit(5);
+    logger.info('Sample data:', sampleData);
+    return sampleData;
+  } catch (err) {
+    logger.error('Error fetching sample data:', err);
+    throw err;
+  }
 }
 
 exports.getStockInfo = async (url) => {
-  const db = getDatabase();
   await logSampleData();
   logger.info(`Checking stock for URL: ${url}`);
   const { articleCode, colorCode } = parseUrl(url);
@@ -54,54 +48,40 @@ exports.getStockInfo = async (url) => {
   const materialId = `${articleCode}${colorCode}`;
   logger.info(`Constructed Material ID: ${materialId}`);
 
-  return new Promise((resolve, reject) => {
-    const query = 'SELECT * FROM stock WHERE materialNumberId LIKE ?';
-    const params = [`${materialId}%`];
-    logger.info(`Executing query: ${query} with params: ${JSON.stringify(params)}`);
+  try {
+    const query = { materialNumberId: { $regex: `^${materialId}`, $options: 'i' } };
+    logger.info(`Executing query:`, query);
 
-    db.all(query, params, (err, rows) => {
-      if (err) {
-        logger.error('Database query error:', err);
-        reject(err);
-      } else {
-        logger.info(`Found ${rows.length} matching records`);
-        if (rows.length > 0) {
-          logger.info(`First matching record: ${JSON.stringify(rows[0])}`);
-        } else {
-          logger.info('No matching records found');
-        }
-        resolve(rows);
-      }
-    });
-  });
+    const results = await Atp.find(query);
+    logger.info(`Found ${results.length} matching records`);
+    if (results.length > 0) {
+      logger.info(`First matching record: ${JSON.stringify(results[0])}`);
+    } else {
+      logger.info('No matching records found');
+    }
+    return results;
+  } catch (err) {
+    logger.error('Database query error:', err);
+    throw err;
+  }
 };
 
 exports.getQuantity = async (materialNumberId, size) => {
-  const db = getDatabase();
   logger.info(`Getting quantity for materialNumberId: ${materialNumberId}, size: ${size}`);
-  return new Promise((resolve, reject) => {
-    const query = 'SELECT atpCurrentWeek30plus FROM stock WHERE materialNumberId = ? AND characteristicValueForMainSizesOfVariantsId = ?';
-    const params = [materialNumberId, size];
-    logger.info(`Executing query: ${query} with params: ${JSON.stringify(params)}`);
+  try {
+    const query = { materialNumberId: materialNumberId, characteristicValueForMainSizesOfVariantsId: size };
+    logger.info(`Executing query:`, query);
 
-    db.get(query, params, (err, row) => {
-      if (err) {
-        logger.error('Database query error:', err);
-        reject(err);
-      } else {
-        const quantity = row ? row.atpCurrentWeek30plus : 0;
-        resolve(quantity);
-      }
-    });
-  });
+    const result = await Atp.findOne(query);
+    const quantity = result ? result.atpCurrentWeek30plus : 0;
+    return quantity;
+  } catch (err) {
+    logger.error('Database query error:', err);
+    throw err;
+  }
 };
 
-async function checkStock(materialNumberId) {
-  const stock = await Atp.findOne({ materialNumberId });
-  return stock ? stock.atpCurrentWeek30plus : 0;
-}
-
 module.exports = {
-  checkStock,
-  // ... other exported functions
+  getStockInfo: exports.getStockInfo,
+  getQuantity: exports.getQuantity
 };
