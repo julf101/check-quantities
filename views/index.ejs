@@ -1,23 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Checker</title>
+    <title>Vérification de disponibilité des articles The North Face</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
     <div class="container mx-auto px-4 py-8">
-        <div x-data="stockChecker()" class="max-w-4xl mx-auto p-4">
-            <h1 class="text-3xl font-bold mb-8 text-center">Stock Checker</h1>
+        <div x-data="stockChecker()" x-init="init()" class="max-w-4xl mx-auto p-4">
+            <h1 class="text-3xl font-bold mb-8 text-center">Vérification de disponibilité des articles The North Face</h1>
             
+            <!-- New info frame -->
+            <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-8 rounded-lg shadow-md">
+                <div class="flex items-center mb-2">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p class="font-bold">Comment utiliser cet outil</p>
+                </div>
+                <div x-html="renderedDescription" class="prose prose-blue max-w-none"></div>
+            </div>
+
             <form @submit.prevent="checkStock" class="mb-8">
                 <div class="flex flex-col sm:flex-row items-center gap-4">
                     <input 
                         type="text" 
                         x-model="url" 
-                        placeholder="Enter product URL" 
+                        placeholder="Entrez l'URL du produit" 
                         class="flex-grow p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                     >
                     <div class="flex gap-2 w-full sm:w-auto">
@@ -25,14 +37,14 @@
                             type="submit" 
                             class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow sm:flex-grow-0 transition duration-150 ease-in-out"
                         >
-                            Check Stock
+                            Vérifier la disponibilité
                         </button>
                         <button 
                             @click="clearAll" 
                             type="button" 
                             class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 flex-grow sm:flex-grow-0 transition duration-150 ease-in-out"
                         >
-                            Clear
+                            Effacer
                         </button>
                     </div>
                 </div>
@@ -44,7 +56,7 @@
             </div>
 
             <div x-show="stockInfo.length > 0" class="bg-white shadow-lg rounded-lg p-6">
-                <h2 class="text-xl font-semibold mb-4">Available Sizes</h2>
+                <h2 class="text-xl font-semibold mb-4">Choisis une taille</h2>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
                     <template x-for="item in stockInfo" :key="item.materialNumberId">
                         <button 
@@ -58,24 +70,13 @@
 
                 <div x-show="selectedItem" class="space-y-4">
                     <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4" role="alert">
-                        <p class="font-bold">Available Quantity:</p>
+                        <p class="font-bold">Quantité disponible à ce jour (sans garantie):</p>
                         <p class="text-3xl" x-text="selectedItem.atpCurrentWeek30plus"></p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-white border rounded-lg p-4 flex items-center justify-between">
-                            <span class="font-semibold">Material Number ID:</span>
-                            <div class="flex items-center">
-                                <span x-text="selectedItem.materialNumberId"></span>
-                                <button @click="copyToClipboard(selectedItem.materialNumberId)" class="ml-2 text-blue-500 hover:text-blue-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="bg-white border rounded-lg p-4 flex items-center justify-between">
-                            <span class="font-semibold">Material Number Text:</span>
+                            <span class="font-semibold">Nom de l'article:</span>
                             <div class="flex items-center">
                                 <span x-text="selectedItem.materialNumberText"></span>
                                 <button @click="copyToClipboard(selectedItem.materialNumberText)" class="ml-2 text-blue-500 hover:text-blue-600">
@@ -86,7 +87,18 @@
                             </div>
                         </div>
                         <div class="bg-white border rounded-lg p-4 flex items-center justify-between">
-                            <span class="font-semibold">Color:</span>
+                            <span class="font-semibold">Numéro de l'article:</span>
+                            <div class="flex items-center">
+                                <span x-text="selectedItem.materialNumberId"></span>
+                                <button @click="copyToClipboard(selectedItem.materialNumberId)" class="ml-2 text-blue-500 hover:text-blue-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bg-white border rounded-lg p-4 flex items-center justify-between">
+                            <span class="font-semibold">Couleur:</span>
                             <div class="flex items-center">
                                 <span x-text="selectedItem.colorNrfColorCode"></span>
                                 <button @click="copyToClipboard(selectedItem.colorNrfColorCode)" class="ml-2 text-blue-500 hover:text-blue-600">
@@ -97,7 +109,7 @@
                             </div>
                         </div>
                         <div class="bg-white border rounded-lg p-4 flex items-center justify-between">
-                            <span class="font-semibold">Size:</span>
+                            <span class="font-semibold">Taille:</span>
                             <div class="flex items-center">
                                 <span x-text="selectedItem.characteristicValueForMainSizesOfVariantsId"></span>
                                 <button @click="copyToClipboard(selectedItem.characteristicValueForMainSizesOfVariantsId)" class="ml-2 text-blue-500 hover:text-blue-600">
@@ -122,8 +134,8 @@
                     </div>
 
                     <div>
-                        <span class="font-semibold">Product Image:</span>
-                        <img :src="selectedItem.lotLogoFullbleedDesktop" alt="Product Image" class="mt-2 max-w-full h-auto rounded-lg">
+                        <span class="font-semibold">Photo de l'article:</span>
+                        <img :src="selectedItem.lotLogoFullbleedDesktop" alt="Photo de l'article" class="mt-2 max-w-full h-auto rounded-lg">
                     </div>
                 </div>
             </div>

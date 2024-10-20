@@ -5,6 +5,18 @@ function stockChecker() {
         selectedSize: null,
         selectedItem: null,
         error: null,
+        description: `
+- Cet outil vous permet de vérifier rapidement la disponibilité des produits The North Face.
+- Entrez l'URL du produit dans le champ ci-dessous.
+- Cliquez sur "Vérifier la disponibilité" pour obtenir les informations sur les disponibilités hebdomadaires.
+- Sélectionnez une taille pour voir les détails spécifiques.
+- Veuilez ensuite copier les détails des articles désirer dans le shop Nendaz Freeride.
+`,
+        renderedDescription: '',
+
+        init() {
+            this.renderedDescription = marked.parse(this.description);
+        },
 
         async checkStock() {
             this.error = null;
