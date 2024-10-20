@@ -5,6 +5,7 @@ function stockChecker() {
         selectedSize: null,
         selectedItem: null,
         error: null,
+        showInfo: true,  // New property to control info box visibility
         description: `
 - Cet outil vous permet de vérifier rapidement la disponibilité des produits The North Face.
 - Entrez l'URL du produit dans le champ ci-dessous.
@@ -40,11 +41,11 @@ function stockChecker() {
                 this.stockInfo = await response.json();
 
                 if (this.stockInfo.length === 0) {
-                    this.error = 'No stock found for this product';
+                    this.error = 'Aucun stock trouvé pour ce produit.';  // Updated French error message
                 }
             } catch (error) {
                 console.error('Error:', error);
-                this.error = 'An error occurred while checking stock';
+                this.error = 'Une erreur s\'est produite lors de la vérification du stock.';  // French error message
             }
         },
 
