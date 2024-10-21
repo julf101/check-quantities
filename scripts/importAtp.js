@@ -5,7 +5,9 @@ const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 const Atp = require('../models/Atp');
 
-const csvFilePath = path.resolve(__dirname, 'ATP.csv');
+require('dotenv').config(); // Make sure to load environment variables
+
+const csvFilePath = path.resolve(__dirname, 'ATP.csv'); // Update this to your new CSV file name
 
 async function importData() {
   return new Promise((resolve, reject) => {
@@ -67,4 +69,4 @@ async function main() {
   }
 }
 
-module.exports = main;
+main().catch(console.error);

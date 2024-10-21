@@ -5,7 +5,6 @@ const path = require('path');
 const stockController = require('./controllers/stockController');
 const logger = require('./utils/logger');
 const { connectToDatabase } = require('./config/database');
-const importAtp = require('./scripts/importAtp');
 
 const app = express();
 
