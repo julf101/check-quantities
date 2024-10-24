@@ -84,7 +84,7 @@
                             <span class="font-semibold">Nom de l'article:</span>
                             <div class="flex items-center">
                                 <span x-text="selectedItem.materialNumberText"></span>
-                                <button @click="copyToClipboard(selectedItem.materialNumberText)" class="ml-2 text-blue-500 hover:text-blue-600">
+                                <button @click="copyToClipboard(selectedItem.materialNumberText, $event.target)" class="ml-2 text-blue-500 hover:text-blue-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                     </svg>
@@ -95,7 +95,7 @@
                             <span class="font-semibold">Numéro de l'article:</span>
                             <div class="flex items-center">
                                 <span x-text="selectedItem.materialNumberId"></span>
-                                <button @click="copyToClipboard(selectedItem.materialNumberId)" class="ml-2 text-blue-500 hover:text-blue-600">
+                                <button @click="copyToClipboard(selectedItem.materialNumberId, $event.target)" class="ml-2 text-blue-500 hover:text-blue-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                     </svg>
@@ -106,7 +106,7 @@
                             <span class="font-semibold">Couleur:</span>
                             <div class="flex items-center">
                                 <span x-text="selectedItem.colorNrfColorCode"></span>
-                                <button @click="copyToClipboard(selectedItem.colorNrfColorCode)" class="ml-2 text-blue-500 hover:text-blue-600">
+                                <button @click="copyToClipboard(selectedItem.colorNrfColorCode, $event.target)" class="ml-2 text-blue-500 hover:text-blue-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                     </svg>
@@ -117,7 +117,7 @@
                             <span class="font-semibold">Taille:</span>
                             <div class="flex items-center">
                                 <span x-text="selectedItem.characteristicValueForMainSizesOfVariantsId"></span>
-                                <button @click="copyToClipboard(selectedItem.characteristicValueForMainSizesOfVariantsId)" class="ml-2 text-blue-500 hover:text-blue-600">
+                                <button @click="copyToClipboard(selectedItem.characteristicValueForMainSizesOfVariantsId, $event.target)" class="ml-2 text-blue-500 hover:text-blue-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                     </svg>
@@ -130,7 +130,7 @@
                         <span class="font-semibold">URL:</span>
                         <div class="flex items-center mt-2">
                             <span class="truncate" x-text="url"></span>
-                            <button @click="copyToClipboard(url)" class="ml-2 text-blue-500 hover:text-blue-600 flex-shrink-0">
+                            <button @click="copyToClipboard(url, $event.target)" class="ml-2 text-blue-500 hover:text-blue-600 flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
