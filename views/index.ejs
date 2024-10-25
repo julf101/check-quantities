@@ -55,9 +55,11 @@
                 </div>
             </form>
 
-            <div x-show="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4" role="alert">
+            <div x-show="error" class="bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded-lg mb-4" role="alert">
                 <p x-text="error"></p>
-                <button @click="clearAll" class="mt-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-150 ease-in-out">OK</button>
+                <button @click="clearAll" class="mt-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition duration-150 ease-in-out">
+                    Compris, je vais chercher un autre produit
+                </button>
             </div>
 
             <div x-show="stockInfo.length > 0" class="bg-white shadow-lg rounded-lg p-6">

@@ -40,7 +40,7 @@ function stockChecker() {
                 this.stockInfo = await response.json();
 
                 if (this.stockInfo.length === 0) {
-                    this.error = 'Aucun stock trouvé pour ce produit.';
+                    this.error = 'Malheureusement ce produit n\'est pas en stock. Prière de choisir un autre produit.';
                 }
             } catch (error) {
                 console.error('Error:', error);
