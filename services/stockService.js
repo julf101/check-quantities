@@ -5,6 +5,9 @@ function parseUrl(url) {
   logger.info(`Parsing URL: ${url}`);
   let articleCode, colorCode;
 
+  // Remove the size parameter if present
+  url = url.split(/&size=[^&]+/)[0];
+
   if (url.includes('?color=')) {
     [articleCode, colorCode] = url.split('?color=');
     articleCode = articleCode.split('-').pop();
