@@ -61,6 +61,14 @@ function stockChecker() {
         selectSize(sizeInfo) {
             this.selectedSize = sizeInfo.size;
             this.selectedSizeInfo = sizeInfo;
+            const colorData = this.stockInfo.colors.find(c => c.colorCode === this.selectedColor);
+            if (colorData) {
+                this.selectedSizeInfo = {
+                    ...sizeInfo,
+                    materialNumberId: colorData.materialNumberIds[sizeInfo.size],
+                    materialNumberText: colorData.materialNumberTexts[sizeInfo.size]
+                };
+            }
         },
 
         formatSize(size) {

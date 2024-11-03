@@ -54,12 +54,18 @@ exports.getStockInfo = async (url) => {
         acc[color] = {
           colorCode: color,
           image: item.lotLogoFullbleedDesktop,
+          materialNumberIds: {},
+          materialNumberTexts: {},
           sizes: {}
         };
       }
       
-      // Aggregate quantities for same sizes
+      // Store material info per size
       const size = item.characteristicValueForMainSizesOfVariantsId;
+      acc[color].materialNumberIds[size] = item.materialNumberId;
+      acc[color].materialNumberTexts[size] = item.materialNumberText;
+      
+      // Aggregate quantities for same sizes
       if (!acc[color].sizes[size]) {
         acc[color].sizes[size] = 0;
       }

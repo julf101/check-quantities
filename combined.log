@@ -1008,3 +1008,55 @@
 {"level":"info","materialNumberId":{"$options":"i","$regex":"NF0A555JG"},"message":"Executing query:","service":"stock-checker"}
 {"level":"info","message":"Found 0 matching records","service":"stock-checker"}
 {"level":"info","message":"No matching records found","service":"stock-checker"}
+{"level":"info","message":"Connected to MongoDB Atlas","service":"stock-checker"}
+{"level":"info","message":"Server running on port 3000","service":"stock-checker"}
+{"level":"info","message":"Checking stock for URL: no change)","service":"stock-checker"}
+{"level":"info","message":"Parsing URL: no change)","service":"stock-checker"}
+{"level":"warn","message":"Invalid URL format: no change)","service":"stock-checker"}
+{"level":"error","message":"Error checking stock: INVALID_URL_FORMAT","service":"stock-checker","stack":"Error: INVALID_URL_FORMAT\n    at parseUrl (/Users/JulienFalco/cursor/check-quantities/stock-checker-app/services/stockService.js:16:11)\n    at exports.getStockInfo (/Users/JulienFalco/cursor/check-quantities/stock-checker-app/services/stockService.js:33:27)\n    at exports.checkStock (/Users/JulienFalco/cursor/check-quantities/stock-checker-app/controllers/stockController.js:11:42)\n    at Layer.handle [as handle_request] (/Users/JulienFalco/cursor/check-quantities/stock-checker-app/node_modules/express/lib/router/layer.js:95:5)\n    at next (/Users/JulienFalco/cursor/check-quantities/stock-checker-app/node_modules/express/lib/router/route.js:149:13)\n    at Route.dispatch (/Users/JulienFalco/cursor/check-quantities/stock-checker-app/node_modules/express/lib/router/route.js:119:3)\n    at Layer.handle [as handle_request] (/Users/JulienFalco/cursor/check-quantities/stock-checker-app/node_modules/express/lib/router/layer.js:95:5)\n    at /Users/JulienFalco/cursor/check-quantities/stock-checker-app/node_modules/express/lib/router/index.js:284:15\n    at Function.process_params (/Users/JulienFalco/cursor/check-quantities/stock-checker-app/node_modules/express/lib/router/index.js:346:12)\n    at next (/Users/JulienFalco/cursor/check-quantities/stock-checker-app/node_modules/express/lib/router/index.js:280:10)"}
+{"level":"info","message":"Checking stock for URL: https://www.thenorthface.ch/fr-ch/p/homme-211701/veste-en-duvet-a-capuche-diablo-2-0-pour-homme-NF0A8992?color=99O","service":"stock-checker"}
+{"level":"info","message":"Parsing URL: https://www.thenorthface.ch/fr-ch/p/homme-211701/veste-en-duvet-a-capuche-diablo-2-0-pour-homme-NF0A8992?color=99O","service":"stock-checker"}
+{"level":"info","message":"Found article code: NF0A8992","service":"stock-checker"}
+{"level":"info","materialNumberId":{"$options":"i","$regex":"NF0A8992"},"message":"Executing query:","service":"stock-checker"}
+{"level":"info","message":"Found 16 matching records","service":"stock-checker"}
+{"level":"info","message":"Connected to MongoDB Atlas","service":"stock-checker"}
+{"level":"info","message":"Server running on port 3000","service":"stock-checker"}
+{"level":"info","message":"Checking stock for URL: https://www.thenorthface.ch/fr-ch/p/homme-211701/veste-en-duvet-a-capuche-diablo-2-0-pour-homme-NF0A8992?color=99O","service":"stock-checker"}
+{"level":"info","message":"Parsing URL: https://www.thenorthface.ch/fr-ch/p/homme-211701/veste-en-duvet-a-capuche-diablo-2-0-pour-homme-NF0A8992?color=99O","service":"stock-checker"}
+{"level":"info","message":"Found article code: NF0A8992","service":"stock-checker"}
+{"level":"info","materialNumberId":{"$options":"i","$regex":"NF0A8992"},"message":"Executing query:","service":"stock-checker"}
+{"level":"info","message":"Found 16 matching records","service":"stock-checker"}
+{"level":"info","message":"Connected to MongoDB Atlas","service":"stock-checker"}
+{"level":"info","message":"Server running on port 3000","service":"stock-checker"}
+{"level":"info","message":"Checking stock for URL: https://www.thenorthface.ch/fr-ch/p/homme-211701/veste-en-duvet-a-capuche-diablo-2-0-pour-homme-NF0A8992?color=99O","service":"stock-checker"}
+{"level":"info","message":"Parsing URL: https://www.thenorthface.ch/fr-ch/p/homme-211701/veste-en-duvet-a-capuche-diablo-2-0-pour-homme-NF0A8992?color=99O","service":"stock-checker"}
+{"level":"info","message":"Found article code: NF0A8992","service":"stock-checker"}
+{"level":"info","materialNumberId":{"$options":"i","$regex":"NF0A8992"},"message":"Executing query:","service":"stock-checker"}
+{"level":"info","message":"Found 16 matching records","service":"stock-checker"}
+{"level":"info","message":"Checking stock for URL: NF0A899299O1005","service":"stock-checker"}
+{"level":"info","message":"Parsing URL: NF0A899299O1005","service":"stock-checker"}
+{"level":"info","message":"Found article code: NF0A899299O1005","service":"stock-checker"}
+{"level":"info","materialNumberId":{"$options":"i","$regex":"NF0A899299O1005"},"message":"Executing query:","service":"stock-checker"}
+{"level":"info","message":"Found 1 matching records","service":"stock-checker"}
+{"level":"info","message":"Checking stock for URL: NF0A899299O","service":"stock-checker"}
+{"level":"info","message":"Parsing URL: NF0A899299O","service":"stock-checker"}
+{"level":"info","message":"Found article code: NF0A899299O","service":"stock-checker"}
+{"level":"info","materialNumberId":{"$options":"i","$regex":"NF0A899299O"},"message":"Executing query:","service":"stock-checker"}
+{"level":"info","message":"Found 5 matching records","service":"stock-checker"}
+{"level":"info","message":"Checking stock for URL: https://www.thenorthface.ch/fr-ch/p/homme-211701/veste-summit-verbier-gore-tex-pour-homme-NF0A87ZK","service":"stock-checker"}
+{"level":"info","message":"Parsing URL: https://www.thenorthface.ch/fr-ch/p/homme-211701/veste-summit-verbier-gore-tex-pour-homme-NF0A87ZK","service":"stock-checker"}
+{"level":"info","message":"Found article code: NF0A87ZK","service":"stock-checker"}
+{"level":"info","materialNumberId":{"$options":"i","$regex":"NF0A87ZK"},"message":"Executing query:","service":"stock-checker"}
+{"level":"info","message":"Found 10 matching records","service":"stock-checker"}
+{"level":"info","message":"Connected to MongoDB Atlas","service":"stock-checker"}
+{"level":"info","message":"Server running on port 3000","service":"stock-checker"}
+{"level":"info","message":"Checking stock for URL: https://www.thenorthface.ch/fr-ch/p/homme-211701/veste-summit-verbier-gore-tex-pour-homme-NF0A87ZK","service":"stock-checker"}
+{"level":"info","message":"Parsing URL: https://www.thenorthface.ch/fr-ch/p/homme-211701/veste-summit-verbier-gore-tex-pour-homme-NF0A87ZK","service":"stock-checker"}
+{"level":"info","message":"Found article code: NF0A87ZK","service":"stock-checker"}
+{"level":"info","materialNumberId":{"$options":"i","$regex":"NF0A87ZK"},"message":"Executing query:","service":"stock-checker"}
+{"level":"info","message":"Found 10 matching records","service":"stock-checker"}
+{"level":"info","message":"Checking stock for URL: https://www.thenorthface.ch/fr-ch/p/homme-211701/veste-en-duvet-a-capuche-diablo-2-0-pour-homme-NF0A8992?color=99O","service":"stock-checker"}
+{"level":"info","message":"Parsing URL: https://www.thenorthface.ch/fr-ch/p/homme-211701/veste-en-duvet-a-capuche-diablo-2-0-pour-homme-NF0A8992?color=99O","service":"stock-checker"}
+{"level":"info","message":"Found article code: NF0A8992","service":"stock-checker"}
+{"level":"info","materialNumberId":{"$options":"i","$regex":"NF0A8992"},"message":"Executing query:","service":"stock-checker"}
+{"level":"info","message":"Found 16 matching records","service":"stock-checker"}
