@@ -63,13 +63,32 @@ function stockChecker() {
             this.selectedSizeInfo = sizeInfo;
         },
 
+        formatSize(size) {
+            const numSize = parseInt(size);
+            if (!isNaN(numSize) && numSize >= 50 && numSize <= 140) {
+                return `US ${(numSize/10).toFixed(1)} (${size})`;
+            }
+            return size;
+        },
+
         getAvailableSizes() {
             if (!this.selectedColor || !this.stockInfo) return [];
             const colorData = this.stockInfo.colors.find(c => c.colorCode === this.selectedColor);
             return colorData ? Object.entries(colorData.sizes)
                 .filter(([_, quantity]) => quantity > 0)
-                .map(([size, quantity]) => ({ size, quantity }))
+                .map(([size, quantity]) => ({ 
+                    size,
+                    displaySize: this.formatSize(size),
+                    quantity 
+                }))
                 .sort((a, b) => {
+                    const aNum = parseInt(a.size);
+                    const bNum = parseInt(b.size);
+                    if (!isNaN(aNum) && !isNaN(bNum) && 
+                        aNum >= 50 && aNum <= 140 && 
+                        bNum >= 50 && bNum <= 140) {
+                        return aNum - bNum;
+                    }
                     const sizeOrder = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL'];
                     return sizeOrder.indexOf(a.size) - sizeOrder.indexOf(b.size);
                 }) : [];
