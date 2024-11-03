@@ -3,32 +3,18 @@ const Atp = require('../models/Atp');
 
 function parseUrl(url) {
   logger.info(`Parsing URL: ${url}`);
-  let articleCode, colorCode;
+  let articleCode;
 
-  // Remove the size parameter if present
-  url = url.split(/&size=[^&]+/)[0];
-
-  if (url.includes('?color=')) {
-    [articleCode, colorCode] = url.split('?color=');
-    articleCode = articleCode.split('-').pop();
-    logger.info(`URL parsed using '?color=' - Article Code: ${articleCode}, Color Code: ${colorCode}`);
-  } else if (url.includes('?variationId=')) {
-    [articleCode, variationPart] = url.split('?variationId=');
-    articleCode = articleCode.split('-').pop();
-    
-    // Check if there's a color parameter after variationId
-    if (variationPart.includes('&color=')) {
-      [, colorCode] = variationPart.split('&color=');
-      logger.info(`URL parsed using '?variationId=' and '&color=' - Article Code: ${articleCode}, Color Code: ${colorCode}`);
-    } else {
-      colorCode = variationPart;
-      logger.info(`URL parsed using '?variationId=' - Article Code: ${articleCode}, Color Code: ${colorCode}`);
-    }
+  // Extract article code from URL
+  const matches = url.match(/NF0A[A-Z0-9]+/);
+  if (matches) {
+    articleCode = matches[0];
+    logger.info(`Found article code: ${articleCode}`);
+    return { articleCode };
   } else {
-    logger.warn(`URL does not contain expected parameters: ${url}`);
+    logger.warn(`Invalid URL format: ${url}`);
+    throw new Error('INVALID_URL_FORMAT');
   }
-
-  return { articleCode, colorCode };
 }
 
 async function logSampleData() {
@@ -43,26 +29,49 @@ async function logSampleData() {
 }
 
 exports.getStockInfo = async (url) => {
-  await logSampleData();
   logger.info(`Checking stock for URL: ${url}`);
-  const { articleCode, colorCode } = parseUrl(url);
-  logger.info(`Parsed URL - Article Code: ${articleCode}, Color Code: ${colorCode}`);
-
-  const materialId = `${articleCode}${colorCode}`;
-  logger.info(`Constructed Material ID: ${materialId}`);
+  const { articleCode } = parseUrl(url);
 
   try {
-    const query = { materialNumberId: { $regex: `^${materialId}`, $options: 'i' } };
+    // Find all items matching the article code
+    const query = { 
+      materialNumberId: { $regex: articleCode, $options: 'i' }
+    };
     logger.info(`Executing query:`, query);
 
     const results = await Atp.find(query);
     logger.info(`Found ${results.length} matching records`);
-    if (results.length > 0) {
-      logger.info(`First matching record: ${JSON.stringify(results[0])}`);
-    } else {
+
+    if (results.length === 0) {
       logger.info('No matching records found');
+      return { error: 'NO_STOCK' };
     }
-    return results;
+
+    // Group results by color
+    const colorGroups = results.reduce((acc, item) => {
+      const color = item.colorNrfColorCode;
+      if (!acc[color]) {
+        acc[color] = {
+          colorCode: color,
+          image: item.lotLogoFullbleedDesktop,
+          sizes: {}
+        };
+      }
+      
+      // Aggregate quantities for same sizes
+      const size = item.characteristicValueForMainSizesOfVariantsId;
+      if (!acc[color].sizes[size]) {
+        acc[color].sizes[size] = 0;
+      }
+      acc[color].sizes[size] += item.atpCurrentWeek30plus || 0;
+      
+      return acc;
+    }, {});
+
+    return {
+      articleCode,
+      colors: Object.values(colorGroups)
+    };
   } catch (err) {
     logger.error('Database query error:', err);
     throw err;

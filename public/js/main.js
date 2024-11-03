@@ -1,16 +1,17 @@
 function stockChecker() {
     return {
         url: '',
-        stockInfo: [],
+        stockInfo: null,
+        selectedColor: null,
         selectedSize: null,
-        selectedItem: null,
+        selectedSizeInfo: null,
         error: null,
         showInfo: true,
         description: `
 - Cet outil vous permet de vérifier rapidement la disponibilité des produits The North Face.
-- Entrez l'URL du produit dans le champ ci-dessous.
-- Cliquez sur "Vérifier la disponibilité" pour obtenir les informations sur les disponibilités hebdomadaires.
-- Sélectionnez une taille pour voir les détails spécifiques.
+- Entrez l'URL du produit dans le champ ci-dessous (exemple: https://www.thenorthface.ch/fr-ch/p/homme-211701/veste-summit-verbier-gore-tex-pour-homme-NF0A87ZK?color=5NO)
+- Sélectionnez la couleur désirée
+- Choisissez votre taille pour voir la disponibilité
 `,
         renderedDescription: '',
 
@@ -19,17 +20,12 @@ function stockChecker() {
         },
 
         async checkStock() {
-            this.error = null;
-            this.stockInfo = [];
-            this.selectedSize = null;
-            this.selectedItem = null;
+            this.resetState();
 
             try {
                 const response = await fetch('/check-stock', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url: this.url }),
                 });
 
@@ -37,27 +33,58 @@ function stockChecker() {
                     throw new Error('Failed to check stock');
                 }
 
-                this.stockInfo = await response.json();
-
-                if (this.stockInfo.length === 0) {
+                const data = await response.json();
+                
+                if (data.error === 'NO_STOCK') {
                     this.error = 'Malheureusement ce produit n\'est pas en stock. Prière de choisir un autre produit.';
+                    return;
                 }
+                
+                if (data.error === 'INVALID_URL_FORMAT') {
+                    this.error = 'L\'URL ne semble pas être au bon format. Veuillez utiliser une URL de produit The North Face, par exemple: https://www.thenorthface.ch/fr-ch/p/homme-211701/veste-summit-verbier-gore-tex-pour-homme-NF0A87ZK?color=5NO';
+                    return;
+                }
+
+                this.stockInfo = data;
             } catch (error) {
                 console.error('Error:', error);
-                this.error = 'Une erreur s\'est produite lors de la vérification du stock.';
+                this.error = 'L\'URL ne semble pas être au bon format. Veuillez utiliser une URL de produit The North Face, par exemple: https://www.thenorthface.ch/fr-ch/p/homme-211701/veste-summit-verbier-gore-tex-pour-homme-NF0A87ZK?color=5NO';
             }
         },
 
-        selectSize(size) {
-            this.selectedSize = size;
-            this.selectedItem = this.stockInfo.find(item => item.characteristicValueForMainSizesOfVariantsId === size);
+        selectColor(colorCode) {
+            this.selectedColor = colorCode;
+            this.selectedSize = null;
+            this.selectedSizeInfo = null;
+        },
+
+        selectSize(sizeInfo) {
+            this.selectedSize = sizeInfo.size;
+            this.selectedSizeInfo = sizeInfo;
+        },
+
+        getAvailableSizes() {
+            if (!this.selectedColor || !this.stockInfo) return [];
+            const colorData = this.stockInfo.colors.find(c => c.colorCode === this.selectedColor);
+            return colorData ? Object.entries(colorData.sizes)
+                .filter(([_, quantity]) => quantity > 0)
+                .map(([size, quantity]) => ({ size, quantity }))
+                .sort((a, b) => {
+                    const sizeOrder = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL'];
+                    return sizeOrder.indexOf(a.size) - sizeOrder.indexOf(b.size);
+                }) : [];
         },
 
         clearAll() {
             this.url = '';
-            this.stockInfo = [];
+            this.resetState();
+        },
+
+        resetState() {
+            this.stockInfo = null;
+            this.selectedColor = null;
             this.selectedSize = null;
-            this.selectedItem = null;
+            this.selectedSizeInfo = null;
             this.error = null;
         },
 
@@ -78,3 +105,5 @@ function stockChecker() {
         },
     };
 }
+
+window.stockChecker = stockChecker;
