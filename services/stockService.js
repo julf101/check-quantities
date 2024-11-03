@@ -5,8 +5,8 @@ function parseUrl(url) {
   logger.info(`Parsing URL: ${url}`);
   let articleCode;
 
-  // Extract article code from URL
-  const matches = url.match(/NF0A[A-Z0-9]+/);
+  // Updated regex to handle both NF0A and NF00 patterns
+  const matches = url.match(/NF0[0A][A-Z0-9]+/);
   if (matches) {
     articleCode = matches[0];
     logger.info(`Found article code: ${articleCode}`);
