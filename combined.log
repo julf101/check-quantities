@@ -977,3 +977,10 @@
 {"level":"info","message":"Found article code: NF0A817Q","service":"stock-checker"}
 {"level":"info","materialNumberId":{"$options":"i","$regex":"NF0A817Q"},"message":"Executing query:","service":"stock-checker"}
 {"level":"info","message":"Found 12 matching records","service":"stock-checker"}
+{"level":"info","message":"Connected to MongoDB Atlas","service":"stock-checker"}
+{"level":"info","message":"Server running on port 3000","service":"stock-checker"}
+{"level":"info","message":"Checking stock for URL: https://www.thenorthface.ch/fr-ch/p/chaussures-747784/chaussures-montantes-en-cuir-back-to-berkeley-iv-pour-homme-NF0A817Q?color=ZN3","service":"stock-checker"}
+{"level":"info","message":"Parsing URL: https://www.thenorthface.ch/fr-ch/p/chaussures-747784/chaussures-montantes-en-cuir-back-to-berkeley-iv-pour-homme-NF0A817Q?color=ZN3","service":"stock-checker"}
+{"level":"info","message":"Found article code: NF0A817Q","service":"stock-checker"}
+{"level":"info","materialNumberId":{"$options":"i","$regex":"NF0A817Q"},"message":"Executing query:","service":"stock-checker"}
+{"level":"info","message":"Found 12 matching records","service":"stock-checker"}
