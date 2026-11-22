@@ -4,7 +4,7 @@ import { formatSize, valueLabel } from '../utils.js';
 import { useI18n } from '../i18n/index.jsx';
 import ProductImage from './ProductImage.jsx';
 
-function CopyButton({ text, label }) {
+export function CopyButton({ text, label, title }) {
   const { t } = useI18n();
   const [done, setDone] = useState(false);
   const copy = async () => {
@@ -15,7 +15,7 @@ function CopyButton({ text, label }) {
     } catch { /* clipboard unavailable */ }
   };
   return (
-    <button onClick={copy} aria-label={label} className="text-xs px-2 py-1 border rounded hover:bg-gray-50">
+    <button onClick={copy} aria-label={label} title={title} className="text-xs px-2 py-1 border rounded hover:bg-gray-50">
       {done ? t('detail.copied') : t('detail.copy')}
     </button>
   );
@@ -43,6 +43,20 @@ export default function ProductDetail({ code, focus = {}, onClose }) {
   }, [onClose]);
 
   const color = model?.colors.find((c) => c.code === colorCode);
+
+  /** Everything about one size, copied as JSON so it can be pasted into any system. */
+  const copyPayload = (size) => JSON.stringify({
+    name: size.materialNumberText,
+    articleNumber: size.materialNumberId,
+    size: size.size,
+    color: color.nrf || color.label,
+    quantity: size.quantity,
+    model: model.code,
+    modelName: model.name,
+    season: model.season,
+    gender: model.gender,
+    category: model.category
+  }, null, 2);
 
   return (
     <div className="fixed inset-0 bg-black/50 z-10 flex items-start justify-center overflow-y-auto p-4" onClick={onClose}>
@@ -94,11 +108,14 @@ export default function ProductDetail({ code, focus = {}, onClose }) {
                       <td className="py-2 font-medium">{formatSize(s.size)}</td>
                       <td>{s.quantity}</td>
                       <td className="font-mono text-xs">{s.materialNumberId}</td>
-                      <td className="text-right"><CopyButton text={s.materialNumberId} label={t('detail.copyAria', { id: s.materialNumberId })} /></td>
+                      <td className="text-right">
+                        <CopyButton text={copyPayload(s)} label={t('detail.copyAria', { id: s.materialNumberId })} title={t('detail.copyTitle')} />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+
             </div>
           </div>
         )}

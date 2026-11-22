@@ -95,6 +95,7 @@ function buildCatalog(rows) {
       color = {
         code: colorKey,
         label: stripCode(row.colorNrfColorCode),
+        nrf: (row.colorNrfColorCode || '').trim(), // full text incl. code, e.g. "660 - MEDIUM PINK"
         family: colorFamily(stripCode(row.colorNrfColorCode)),
         imageCode: imageCodeOf(row),
         total: 0,

@@ -68,7 +68,9 @@ export default {
   'detail.material': 'N° materiale',
   'detail.copy': 'Copia',
   'detail.copied': 'Copiato ✓',
-  'detail.copyAria': 'Copia {id}',
+
+  'detail.copyAria': "Copia tutte le informazioni di {id} (JSON)",
+  'detail.copyTitle': "Copia nome, numero articolo, taglia, colore… in formato JSON",
 
   'upload.title': 'Importa un file ATP',
   'upload.intro': 'Il file sostituisce tutto lo stock attuale. In caso di errore, i dati esistenti vengono conservati.',
