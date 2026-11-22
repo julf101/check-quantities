@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "test": "node --test test/ && vitest run",
+    "test": "node --test \"test/**/*.test.js\" && vitest run",
     "import-atp": "node scripts/importAtp.js",
     "start": "node app.js",
     "dev": "vite",
