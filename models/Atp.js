@@ -17,9 +17,7 @@ const atpSchema = new mongoose.Schema({
   atpCurrentWeek30plus: Number
 });
 
-// The collection name is determined by the first argument passed to mongoose.model(). In this case, it's 'Atp'.
-// Mongoose automatically pluralizes and lowercases the model name to create the collection name. So, the model 'Atp' will correspond to a collection named 'atps' in MongoDB.
-// If you want to specify a different collection name, you can do so by passing a third argument to mongoose.model(). For example:
+atpSchema.index({ materialNumberId: 1 });
 
-
+// Collection name is 'atps' (Mongoose pluralizes and lowercases the model name).
 module.exports = mongoose.model('Atp', atpSchema);

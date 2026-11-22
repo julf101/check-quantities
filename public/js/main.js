@@ -29,7 +29,7 @@ function stockChecker() {
                     body: JSON.stringify({ url: this.url }),
                 });
 
-                if (!response.ok) {
+                if (!response.ok && response.status !== 400) {
                     throw new Error('Failed to check stock');
                 }
 

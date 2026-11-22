@@ -34,8 +34,10 @@ exports.getStockInfo = async (url) => {
 
   try {
     // Find all items matching the article code
-    const query = { 
-      materialNumberId: { $regex: articleCode, $options: 'i' }
+    // articleCode only contains [A-Z0-9], so it is safe to use in a regex.
+    // Anchored prefix + index on materialNumberId avoids a full collection scan.
+    const query = {
+      materialNumberId: { $regex: `^${articleCode}` }
     };
     logger.info(`Executing query:`, query);
 
@@ -99,7 +101,4 @@ exports.getQuantity = async (materialNumberId, size) => {
   }
 };
 
-module.exports = {
-  getStockInfo: exports.getStockInfo,
-  getQuantity: exports.getQuantity
-};
+exports.parseUrl = parseUrl;

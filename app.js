@@ -1,8 +1,8 @@
 require('dotenv').config();
 const express = require('express');
-const bodyParser = require('body-parser');
 const path = require('path');
-const stockController = require('./controllers/stockController');
+const stockRoutes = require('./routes/stockRoutes');
+const errorHandler = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
 const { connectToDatabase } = require('./config/database');
 
@@ -11,8 +11,9 @@ const app = express();
 console.log('Starting application...');
 
 // Middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.disable('x-powered-by');
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 // View engine setup
@@ -20,9 +21,10 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // Routes
-app.get('/', stockController.renderHomePage);
-app.post('/check-stock', stockController.checkStock);
-app.post('/get-quantity', stockController.getQuantity);
+app.use('/', stockRoutes);
+
+// Error handler (must be registered after the routes)
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
@@ -39,7 +41,9 @@ async function startServer() {
   }
 }
 
-// Initialize database and start server
-startServer();
+// Only start when run directly, so the app can be required in tests
+if (require.main === module) {
+  startServer();
+}
 
 module.exports = app;
