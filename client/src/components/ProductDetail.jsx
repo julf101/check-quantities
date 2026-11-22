@@ -50,10 +50,11 @@ export default function ProductDetail({ code, focus = {}, productUrl = null, onC
       articleName: model.name,
       articleCode: size.materialNumberId,
       articleColour: color.nrf || color.label,
-      articleSize: size.size
+      articleSize: size.size,
+      // always present (empty when unknown) so the receiving form can validate the article;
+      // only filled when the pasted URL is really about this model
+      articleUrl: productUrl && productUrl.includes(model.code) ? productUrl : ''
     };
-    // only add the shop link when the pasted URL is really about this model
-    if (productUrl && productUrl.includes(model.code)) payload.articleUrl = productUrl;
     return JSON.stringify(payload, null, 2);
   };
 

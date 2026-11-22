@@ -35,7 +35,8 @@ describe('ProductDetail copy button', () => {
       articleName: 'KID PERF FLEECE SET',
       articleCode: 'NF0A8CV0S9B1003',
       articleColour: '660 - MEDIUM PINK',
-      articleSize: '7'
+      articleSize: '7',
+      articleUrl: ''
     });
   });
 
@@ -47,11 +48,11 @@ describe('ProductDetail copy button', () => {
     expect(JSON.parse(writeText.mock.calls[0][0]).articleUrl).toBe(url);
   });
 
-  it('ignores a pasted URL that belongs to another model', async () => {
+  it('leaves articleUrl empty for a pasted URL that belongs to another model', async () => {
     render(<I18nProvider initial="fr"><ProductDetail code="NF0A8CV0" productUrl="https://x.ch/p/y-NF0A87ZK?color=5NO" onClose={() => {}} /></I18nProvider>);
     fireEvent.click(await screen.findByRole('button', { name: /NF0A8CV0S9B1003/ }));
     await waitFor(() => expect(writeText).toHaveBeenCalled());
-    expect(JSON.parse(writeText.mock.calls[0][0])).not.toHaveProperty('articleUrl');
+    expect(JSON.parse(writeText.mock.calls[0][0]).articleUrl).toBe('');
   });
 
   it('copies the data of the colour that is displayed', async () => {
