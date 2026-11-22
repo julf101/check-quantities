@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { fetchModel } from '../api.js';
-import { formatSize } from '../utils.js';
+import { formatSize, valueLabel } from '../utils.js';
+import { useI18n } from '../i18n/index.jsx';
 import ProductImage from './ProductImage.jsx';
 
 function CopyButton({ text, label }) {
+  const { t } = useI18n();
   const [done, setDone] = useState(false);
   const copy = async () => {
     try {
@@ -14,12 +16,14 @@ function CopyButton({ text, label }) {
   };
   return (
     <button onClick={copy} aria-label={label} className="text-xs px-2 py-1 border rounded hover:bg-gray-50">
-      {done ? 'Copié ✓' : 'Copier'}
+      {done ? t('detail.copied') : t('detail.copy')}
     </button>
   );
 }
 
 export default function ProductDetail({ code, focus = {}, onClose }) {
+  const i18n = useI18n();
+  const { t } = i18n;
   const [model, setModel] = useState(null);
   const [error, setError] = useState(false);
   const [colorCode, setColorCode] = useState(null);
@@ -44,13 +48,13 @@ export default function ProductDetail({ code, focus = {}, onClose }) {
     <div className="fixed inset-0 bg-black/50 z-10 flex items-start justify-center overflow-y-auto p-4" onClick={onClose}>
       <div
         role="dialog"
-        aria-label="Détail du produit"
+        aria-label={t('detail.title')}
         className="bg-white rounded-lg shadow-xl w-full max-w-4xl my-8 p-6 relative"
         onClick={(e) => e.stopPropagation()}
       >
-        <button onClick={onClose} aria-label="Fermer" className="absolute top-3 right-4 text-2xl text-gray-400 hover:text-gray-700">×</button>
-        {error && <p className="text-red-700">Impossible de charger ce produit.</p>}
-        {!model && !error && <p>Chargement…</p>}
+        <button onClick={onClose} aria-label={t('detail.close')} className="absolute top-3 right-4 text-2xl text-gray-400 hover:text-gray-700">×</button>
+        {error && <p className="text-red-700">{t('detail.error')}</p>}
+        {!model && !error && <p>{t('detail.loading')}</p>}
         {model && color && (
           <div className="grid md:grid-cols-2 gap-6">
             <div>
@@ -72,16 +76,16 @@ export default function ProductDetail({ code, focus = {}, onClose }) {
             </div>
             <div>
               <h2 className="text-xl font-bold">{model.name}</h2>
-              <p className="text-sm text-gray-500 mb-1">{model.gender} · {model.categoryGroup} / {model.category} · {model.season}</p>
-              <p className="text-sm">Coloris : <strong>{color.label}</strong> <span className="text-gray-400">({color.code})</span></p>
+              <p className="text-sm text-gray-500 mb-1">{valueLabel('gender', model.gender, i18n)} · {valueLabel('categoryGroup', model.categoryGroup, i18n)} / {valueLabel('category', model.category, i18n)} · {model.season}</p>
+              <p className="text-sm">{t('detail.color')} : <strong>{color.label}</strong> <span className="text-gray-400">({color.code})</span></p>
               <p className="text-sm mb-4">
-                Stock de ce coloris : <strong className="text-green-700">{color.total}</strong>
-                {model.colors.length > 1 && <span className="text-gray-500"> · total du modèle ({model.colors.length} coloris) : {model.total}</span>}
+                {t('detail.colorStock')} : <strong className="text-green-700">{color.total}</strong>
+                {model.colors.length > 1 && <span className="text-gray-500"> · {t('detail.modelTotal', { count: model.colors.length })} : {model.total}</span>}
               </p>
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left text-gray-500 border-b">
-                    <th className="py-1">Taille</th><th>Stock</th><th>N° matériel</th><th />
+                    <th className="py-1">{t('detail.size')}</th><th>{t('detail.stock')}</th><th>{t('detail.material')}</th><th />
                   </tr>
                 </thead>
                 <tbody>
@@ -90,7 +94,7 @@ export default function ProductDetail({ code, focus = {}, onClose }) {
                       <td className="py-2 font-medium">{formatSize(s.size)}</td>
                       <td>{s.quantity}</td>
                       <td className="font-mono text-xs">{s.materialNumberId}</td>
-                      <td className="text-right"><CopyButton text={s.materialNumberId} label={`Copier ${s.materialNumberId}`} /></td>
+                      <td className="text-right"><CopyButton text={s.materialNumberId} label={t('detail.copyAria', { id: s.materialNumberId })} /></td>
                     </tr>
                   ))}
                 </tbody>

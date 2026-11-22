@@ -167,3 +167,22 @@ test('currentSeasons are the four most recent seasons in the file', () => {
   const catalog = buildCatalog(['F02027', 'S02027', 'F02026', 'S02026', 'F02025', 'S02025'].map((x, i) => mk(`NF0A000${i}AAA1`, x)));
   assert.deepStrictEqual(queryCatalog(catalog, {}).currentSeasons, ['FW27', 'SS27', 'FW26', 'SS26']);
 });
+
+test('sorting by stock uses the filtered figures the cards show', () => {
+  // beanie: 31 in total; jacket: black 11 + brown 4. Filtering to BROWN leaves the jacket with 4.
+  const catalog = buildCatalog(rows);
+  assert.deepStrictEqual(queryCatalog(catalog, { sort: 'stock' }).items.map((i) => i.total), [31, 15]);
+  // size filter XL: jacket black XL 4 + brown XL 4 = 8; beanie has no XL
+  const xl = queryCatalog(catalog, { sort: 'stock', size: 'XL' });
+  assert.deepStrictEqual(xl.items.map((i) => [i.code, i.total]), [['NF0A8D1T', 8]]);
+});
+
+test('default season sort puts the best-stocked article first within a season', () => {
+  const mk = (cross, season, qty, style) => row({ crossPlantConfigurableMaterial: cross, lastSeasonYearSeasonEMEA: season, atpCurrentWeek30plus: qty, style });
+  const catalog = buildCatalog([
+    mk('NF0A0001AAA1', 'F02027', 5, 'Zed small'), mk('NF0A0002AAA1', 'F02027', 50, 'Beta big'),
+    mk('NF0A0003AAA1', 'F02026', 999, 'Old season huge'), mk('NF0A0004AAA1', 'F02027', 50, 'Alpha big')
+  ]);
+  assert.deepStrictEqual(queryCatalog(catalog, { sort: 'season' }).items.map((i) => i.name),
+    ['Alpha big', 'Beta big', 'Zed small', 'Old season huge']); // ties broken by name
+});

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { fetchCatalog } from '../api.js';
 import { FACET_KEYS, normalizeQuery } from '../utils.js';
+import { useI18n } from '../i18n/index.jsx';
 import FilterBar from '../components/FilterBar.jsx';
 import ProductCard from '../components/ProductCard.jsx';
 import ProductDetail from '../components/ProductDetail.jsx';
@@ -23,6 +24,7 @@ function writeUrl(state) {
 }
 
 export default function Catalog() {
+  const { t } = useI18n();
   const [state, setState] = useState(readUrl);
   const [text, setText] = useState(state.q);
   const [data, setData] = useState(null);
@@ -70,20 +72,20 @@ export default function Catalog() {
           type="search"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Rechercher un nom, un code (NF0A…), une couleur — ou coller une URL produit"
-          aria-label="Recherche"
+          placeholder={t('catalog.searchPlaceholder')}
+          aria-label={t('catalog.search')}
           className="flex-1 min-w-[16rem] p-3 border rounded-lg shadow-sm"
         />
         <select
           value={state.sort}
           onChange={(e) => setState((s) => ({ ...s, sort: e.target.value, page: 1 }))}
-          aria-label="Tri"
+          aria-label={t('sort.label')}
           className="p-3 border rounded-lg bg-white"
         >
-          <option value="season">Saison (récente d'abord)</option>
-          <option value="name">Nom</option>
-          <option value="stock">Stock</option>
-          <option value="colors">Nombre de coloris</option>
+          <option value="season">{t('sort.season')}</option>
+          <option value="name">{t('sort.name')}</option>
+          <option value="stock">{t('sort.stock')}</option>
+          <option value="colors">{t('sort.colors')}</option>
         </select>
       </div>
 
@@ -97,19 +99,19 @@ export default function Catalog() {
       />
 
       <main>
-        {error && <p className="text-red-700">Impossible de charger le catalogue.</p>}
+        {error && <p className="text-red-700">{t('catalog.loadError')}</p>}
         {data && (
           <>
-            <p className="text-sm text-gray-600 mb-3" aria-live="polite">{data.total} articles</p>
-            {data.total === 0 && <p className="bg-white rounded-lg p-6 text-gray-600">Aucun article ne correspond à ces critères.</p>}
+            <p className="text-sm text-gray-600 mb-3" aria-live="polite">{t('catalog.count', { count: data.total })}</p>
+            {data.total === 0 && <p className="bg-white rounded-lg p-6 text-gray-600">{t('catalog.empty')}</p>}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {data.items.map((item) => <ProductCard key={item.code} item={item} onOpen={(code, focus) => setOpen({ code, focus })} />)}
             </div>
             {pages > 1 && (
               <nav className="flex items-center justify-center gap-4 mt-6" aria-label="Pagination">
-                <button disabled={state.page <= 1} onClick={() => setState((s) => ({ ...s, page: s.page - 1 }))} className="px-4 py-2 bg-white rounded border disabled:opacity-40">Précédent</button>
-                <span className="text-sm">Page {data.page} / {pages}</span>
-                <button disabled={state.page >= pages} onClick={() => setState((s) => ({ ...s, page: s.page + 1 }))} className="px-4 py-2 bg-white rounded border disabled:opacity-40">Suivant</button>
+                <button disabled={state.page <= 1} onClick={() => setState((s) => ({ ...s, page: s.page - 1 }))} className="px-4 py-2 bg-white rounded border disabled:opacity-40">{t('page.prev')}</button>
+                <span className="text-sm">{t('page.of', { page: data.page, pages })}</span>
+                <button disabled={state.page >= pages} onClick={() => setState((s) => ({ ...s, page: s.page + 1 }))} className="px-4 py-2 bg-white rounded border disabled:opacity-40">{t('page.next')}</button>
               </nav>
             )}
           </>

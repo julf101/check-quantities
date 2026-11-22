@@ -4,11 +4,14 @@ const { readSheet } = require('read-excel-file/node');
 const mongoose = require('mongoose');
 const Atp = require('../models/Atp');
 const ImportRun = require('../models/ImportRun');
+const ImportFile = require('../models/ImportFile');
 const logger = require('../utils/logger');
 const { invalidateCatalog } = require('./catalogService');
+const { notifyImportSuccess } = require('./slackService');
 
 const BATCH_SIZE = 5000;
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+const KEEP_FILES = 12; // uploaded files kept for download; older ones are pruned
 
 // Columns the app cannot work without; the rest are optional.
 const REQUIRED_HEADERS = [
@@ -20,7 +23,14 @@ const REQUIRED_HEADERS = [
   'Color (nrf Color Code)'
 ];
 
-class ImportError extends Error {}
+/** `code` lets the front end translate the message; `message` is a French fallback. */
+class ImportError extends Error {
+  constructor(code, message, params = {}) {
+    super(message);
+    this.code = code;
+    this.params = params;
+  }
+}
 
 const normalizeHeader = (h) => String(h ?? '').replace(/^﻿/, '').trim();
 const text = (v) => (v === null || v === undefined ? '' : String(v).trim());
@@ -47,7 +57,7 @@ function mapRow(row) {
 function assertHeaders(headers) {
   const missing = REQUIRED_HEADERS.filter((h) => !headers.includes(h));
   if (missing.length) {
-    throw new ImportError(`Colonnes manquantes dans le fichier : ${missing.join(', ')}`);
+    throw new ImportError('MISSING_COLUMNS', `Colonnes manquantes dans le fichier : ${missing.join(', ')}`, { columns: missing.join(', ') });
   }
 }
 
@@ -56,14 +66,14 @@ function detectFormat(filename, buffer) {
   const ext = String(filename || '').toLowerCase().split('.').pop();
   const isZip = buffer.length > 3 && buffer[0] === 0x50 && buffer[1] === 0x4b; // "PK"
   if (ext === 'xlsx') {
-    if (!isZip) throw new ImportError('Ce fichier .xlsx est invalide ou corrompu.');
+    if (!isZip) throw new ImportError('INVALID_XLSX', 'Ce fichier .xlsx est invalide ou corrompu.');
     return 'xlsx';
   }
   if (ext === 'csv') {
-    if (isZip || buffer.includes(0)) throw new ImportError('Ce fichier .csv semble être un fichier binaire.');
+    if (isZip || buffer.includes(0)) throw new ImportError('BINARY_CSV', 'Ce fichier .csv semble être un fichier binaire.');
     return 'csv';
   }
-  throw new ImportError('Format non supporté : utilisez un fichier .csv ou .xlsx.');
+  throw new ImportError('UNSUPPORTED_FORMAT', 'Format non supporté : utilisez un fichier .csv ou .xlsx.');
 }
 
 async function* rowsFromCsv(buffer) {
@@ -73,7 +83,7 @@ async function* rowsFromCsv(buffer) {
     if (!checked) { assertHeaders(Object.keys(row)); checked = true; }
     yield row;
   }
-  if (!checked) throw new ImportError('Le fichier ne contient aucune ligne.');
+  if (!checked) throw new ImportError('EMPTY_FILE', 'Le fichier ne contient aucune ligne.');
 }
 
 async function* rowsFromXlsx(buffer) {
@@ -81,9 +91,9 @@ async function* rowsFromXlsx(buffer) {
   try {
     sheet = await readSheet(buffer);
   } catch (err) {
-    throw new ImportError('Impossible de lire ce fichier Excel (fichier invalide ou corrompu).');
+    throw new ImportError('UNREADABLE_XLSX', 'Impossible de lire ce fichier Excel (fichier invalide ou corrompu).');
   }
-  if (sheet.length < 2) throw new ImportError('Le fichier ne contient aucune ligne.');
+  if (sheet.length < 2) throw new ImportError('EMPTY_FILE', 'Le fichier ne contient aucune ligne.');
   const headers = sheet[0].map(normalizeHeader);
   assertHeaders(headers);
   for (const cells of sheet.slice(1)) {
@@ -123,7 +133,7 @@ async function loadRows(rows) {
       if (batch.length >= BATCH_SIZE) await flush();
     }
     await flush();
-    if (imported === 0) throw new ImportError('Aucune ligne valide : les données existantes sont conservées.');
+    if (imported === 0) throw new ImportError('NO_VALID_ROWS', 'Aucune ligne valide : les données existantes sont conservées.');
     await temp.createIndex({ materialNumberId: 1 });
     await temp.rename(liveName, { dropTarget: true });
     invalidateCatalog();
@@ -146,28 +156,55 @@ let running = false;
 async function markStaleRunsFailed() {
   await ImportRun.updateMany(
     { status: 'running' },
-    { status: 'failed', error: 'Interrompu (redémarrage du serveur)', finishedAt: new Date() }
+    { status: 'failed', error: 'Interrompu (redémarrage du serveur)', errorCode: 'INTERRUPTED', finishedAt: new Date() }
   );
+}
+
+/** Keeps the files of the newest KEEP_FILES runs; frees the space of older ones. */
+async function pruneOldFiles() {
+  const old = await ImportRun.find({ fileStored: true }).sort({ startedAt: -1 }).skip(KEEP_FILES).select('_id').lean();
+  if (!old.length) return;
+  const ids = old.map((r) => r._id);
+  await ImportFile.deleteMany({ run: { $in: ids } });
+  await ImportRun.updateMany({ _id: { $in: ids } }, { fileStored: false });
 }
 
 /** Starts an import in the background and returns its history record straight away. */
 async function startImport(buffer, filename) {
-  if (running) throw new ImportError('Un import est déjà en cours. Réessayez dans un instant.');
+  if (running) throw new ImportError('IMPORT_RUNNING', 'Un import est déjà en cours. Réessayez dans un instant.');
   const format = detectFormat(filename, buffer); // fail fast, before creating a run
   running = true;
   const run = await ImportRun.create({ filename, format, sizeBytes: buffer.length });
+  try {
+    await ImportFile.create({
+      run: run._id, filename, data: buffer,
+      contentType: format === 'xlsx' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'text/csv'
+    });
+    await ImportRun.findByIdAndUpdate(run._id, { fileStored: true });
+    run.fileStored = true;
+  } catch (err) {
+    logger.error('Could not store the uploaded file (import continues):', err);
+  }
 
   (async () => {
     try {
       const result = await importBuffer(buffer, filename);
       await ImportRun.findByIdAndUpdate(run._id, { status: 'success', rows: result.rows, skipped: result.skipped, finishedAt: new Date() });
       logger.info(`Import ${filename} done: ${result.rows} rows, ${result.skipped} skipped`);
+      notifyImportSuccess({ filename, rows: result.rows, skipped: result.skipped }); // fire and forget
     } catch (err) {
-      const message = err instanceof ImportError ? err.message : 'Erreur interne pendant l\'import.';
-      if (!(err instanceof ImportError)) logger.error('Import failed:', err);
-      await ImportRun.findByIdAndUpdate(run._id, { status: 'failed', error: message, finishedAt: new Date() }).catch(() => {});
+      const known = err instanceof ImportError;
+      if (!known) logger.error('Import failed:', err);
+      await ImportRun.findByIdAndUpdate(run._id, {
+        status: 'failed',
+        error: known ? err.message : 'Erreur interne pendant l\'import.',
+        errorCode: known ? err.code : 'INTERNAL',
+        errorParams: known ? err.params : undefined,
+        finishedAt: new Date()
+      }).catch(() => {});
     } finally {
       running = false;
+      pruneOldFiles().catch((err) => logger.error('Pruning old uploads failed:', err));
     }
   })();
 
@@ -175,6 +212,6 @@ async function startImport(buffer, filename) {
 }
 
 module.exports = {
-  ImportError, MAX_UPLOAD_BYTES, REQUIRED_HEADERS,
+  ImportError, KEEP_FILES, MAX_UPLOAD_BYTES, REQUIRED_HEADERS,
   mapRow, detectFormat, rowsFromCsv, rowsFromXlsx, importBuffer, startImport, markStaleRunsFailed
 };

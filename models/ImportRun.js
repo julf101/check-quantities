@@ -8,6 +8,9 @@ const importRunSchema = new mongoose.Schema({
   rows: { type: Number, default: 0 },
   skipped: { type: Number, default: 0 },
   error: String,
+  errorCode: String,
+  errorParams: mongoose.Schema.Types.Mixed,
+  fileStored: { type: Boolean, default: false },
   startedAt: { type: Date, default: Date.now },
   finishedAt: Date
 });

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { imageUrl } from '../utils.js';
+import { useI18n } from '../i18n/index.jsx';
 
 // code+width -> object URL, or null when TNF has no photo for this code
 const cache = new Map();
@@ -22,6 +23,7 @@ async function load(code, width) {
 }
 
 export default function ProductImage({ code, width = 300, alt, className = '' }) {
+  const { t } = useI18n();
   const [src, setSrc] = useState(undefined); // undefined = loading, null = none
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export default function ProductImage({ code, width = 300, alt, className = '' })
       aria-label={alt}
       className={`flex items-center justify-center bg-gray-200 text-gray-400 ${src === undefined ? 'animate-pulse' : ''} ${className}`}
     >
-      {src === null && <span className="text-xs">Pas d'image</span>}
+      {src === null && <span className="text-xs">{t('card.noImage')}</span>}
     </div>
   );
 }
