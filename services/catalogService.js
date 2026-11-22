@@ -138,7 +138,8 @@ const FACETS = {
 };
 
 const SORTS = {
-  season: (a, b) => b.seasonRank - a.seasonRank || a.name.localeCompare(b.name),
+  // newest season first, then the best-stocked articles within a season
+  season: (a, b) => b.seasonRank - a.seasonRank || b.total - a.total || a.name.localeCompare(b.name),
   name: (a, b) => a.name.localeCompare(b.name),
   stock: (a, b) => b.total - a.total || a.name.localeCompare(b.name),
   colors: (a, b) => b.colors.length - a.colors.length || a.name.localeCompare(b.name)
@@ -219,29 +220,30 @@ function queryCatalog(catalog, params = {}) {
     facets[key] = entries;
   }
 
-  const views = new Map();
-  const results = [];
+  // What each card will show (filtered stock), computed once so sorting uses the same figures.
+  const rows = [];
   for (const m of catalog) {
     const v = view(m);
-    if (v) { views.set(m, v); results.push(m); }
-  }
-  results.sort(SORTS[params.sort] || SORTS.name);
-
-  const page = Math.max(1, parseInt(params.page, 10) || 1);
-  const items = results.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((m) => {
-    const v = views.get(m);
+    if (!v) continue;
     const qty = (c) => (v.sized ? c.sizes.filter((sz) => sizeFilter.includes(sz.size)).reduce((n, sz) => n + sz.quantity, 0) : c.total);
     const colors = v.colors.map((c) => ({ code: c.code, label: c.label, imageCode: c.imageCode, total: qty(c) }));
-    return {
-      code: m.code, name: m.name, gender: m.gender, categoryGroup: m.categoryGroup,
-      category: m.category, collection: m.collection, season: m.season,
-      // exact material-number match -> that size's stock; otherwise the stock of what is shown
-      total: v.sizes.length ? v.sizes.reduce((n, sz) => n + sz.quantity, 0) : colors.reduce((n, c) => n + c.total, 0),
-      narrowed: v.colors.length !== m.colors.length || v.sized,
-      matchedSizes: v.sizes,
-      colors
-    };
-  });
+    const total = v.sizes.length ? v.sizes.reduce((n, sz) => n + sz.quantity, 0) : colors.reduce((n, c) => n + c.total, 0);
+    rows.push({ m, v, colors, total, sortKey: { name: m.name, seasonRank: m.seasonRank, total, colors } });
+  }
+  const compare = SORTS[params.sort] || SORTS.name;
+  rows.sort((a, b) => compare(a.sortKey, b.sortKey));
+  const results = rows;
+
+  const page = Math.max(1, parseInt(params.page, 10) || 1);
+  const items = results.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map(({ m, v, colors, total }) => ({
+    code: m.code, name: m.name, gender: m.gender, categoryGroup: m.categoryGroup,
+    category: m.category, collection: m.collection, season: m.season,
+    // exact material-number match -> that size's stock; otherwise the stock of what is shown
+    total,
+    narrowed: v.colors.length !== m.colors.length || v.sized,
+    matchedSizes: v.sizes,
+    colors
+  }));
 
   // the four most recent seasons present in the file ("saisons actuelles")
   const currentSeasons = [...new Set(catalog.map((m) => m.season).filter(Boolean))]

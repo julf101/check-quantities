@@ -16,56 +16,36 @@ export function imageUrl(imageCode, width) {
   return `${IMAGE_BASE}/c_fill,f_auto,w_${width}/${imageCode}/x.jpg`;
 }
 
-export const FACET_LABELS = {
-  gender: 'Genre',
-  categoryGroup: 'Type',
-  category: 'Catégorie',
-  collection: 'Collection',
-  season: 'Saison',
-  color: 'Couleur',
-  size: 'Taille'
-};
+export const FACET_KEYS = ['gender', 'categoryGroup', 'category', 'collection', 'season', 'color', 'size'];
 
-export const GENDERS = [
-  { value: 'Mens', label: 'Homme' },
-  { value: 'Womens', label: 'Femme' },
-  { value: 'Kids', label: 'Enfant' },
-  { value: 'Unisex', label: 'Unisexe' }
-];
+export const GENDERS = ['Mens', 'Womens', 'Kids', 'Unisex'];
 
 export const COLOR_FAMILIES = {
-  BLACK: { label: 'Noir', hex: '#111827' },
-  WHITE: { label: 'Blanc', hex: '#ffffff' },
-  GREY: { label: 'Gris', hex: '#9ca3af' },
-  BEIGE: { label: 'Beige', hex: '#d6c3a3' },
-  BROWN: { label: 'Marron', hex: '#78512f' },
-  RED: { label: 'Rouge', hex: '#dc2626' },
-  ORANGE: { label: 'Orange', hex: '#f97316' },
-  YELLOW: { label: 'Jaune', hex: '#facc15' },
-  GREEN: { label: 'Vert', hex: '#16a34a' },
-  TEAL: { label: 'Turquoise', hex: '#14b8a6' },
-  BLUE: { label: 'Bleu', hex: '#2563eb' },
-  PURPLE: { label: 'Violet', hex: '#9333ea' },
-  PINK: { label: 'Rose', hex: '#ec4899' },
-  OTHER: { label: 'Autre', hex: '#e5e7eb' }
+  BLACK: '#111827', WHITE: '#ffffff', GREY: '#9ca3af', BEIGE: '#d6c3a3', BROWN: '#78512f',
+  RED: '#dc2626', ORANGE: '#f97316', YELLOW: '#facc15', GREEN: '#16a34a', TEAL: '#14b8a6',
+  BLUE: '#2563eb', PURPLE: '#9333ea', PINK: '#ec4899', OTHER: '#e5e7eb'
 };
 
 const LETTER_SIZES = ['XXXS', 'XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'OS'];
 export const isLetterSize = (size) => LETTER_SIZES.includes(size);
 
-/** Human label for a filter value (used by the filter bar and the active-filter tags). */
-export function valueLabel(key, value) {
-  if (key === 'gender') return GENDERS.find((g) => g.value === value)?.label || value;
-  if (key === 'season') return seasonName(value);
-  if (key === 'color') return COLOR_FAMILIES[value]?.label || value;
-  if (key === 'size') return formatSize(value);
-  return value;
-}
-export const FACET_KEYS = Object.keys(FACET_LABELS);
-
 /** FW27 -> "FW27 · Automne/Hiver 2027" (FW = Fall/Winter, SS = Spring/Summer). */
-export function seasonName(code) {
+export function seasonName(code, i18n) {
   const m = /^(FW|SS)(\d{2})$/.exec(code || '');
   if (!m) return code;
-  return `${code} · ${m[1] === 'FW' ? 'Automne/Hiver' : 'Printemps/Été'} 20${m[2]}`;
+  return `${code} · ${i18n.t(`season.${m[1]}`, { year: `20${m[2]}` })}`;
+}
+
+/** Human label for a filter value in the current language (unknown values are shown as-is). */
+export function valueLabel(key, value, i18n) {
+  const known = (k) => (i18n.has(k) ? i18n.t(k) : value);
+  switch (key) {
+    case 'gender': return known(`gender.${value}`);
+    case 'color': return known(`color.${value}`);
+    case 'categoryGroup': return known(`group.${value}`);
+    case 'category': return known(`category.${value}`);
+    case 'season': return seasonName(value, i18n);
+    case 'size': return formatSize(value);
+    default: return value;
+  }
 }

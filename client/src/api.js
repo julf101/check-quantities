@@ -22,7 +22,12 @@ export async function uploadFile(file) {
   form.append('file', file);
   const res = await fetch('/api/imports', { method: 'POST', body: form });
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(body.error || "L'envoi a échoué.");
+  if (!res.ok) {
+    const err = new Error(body.error || 'upload failed');
+    err.code = body.code;
+    err.params = body.params;
+    throw err;
+  }
   return body;
 }
 
@@ -35,5 +40,11 @@ export async function fetchImport(id) {
 export async function fetchImports() {
   const res = await fetch('/api/imports');
   if (!res.ok) throw new Error('history request failed');
+  return res.json();
+}
+
+export async function fetchStatus() {
+  const res = await fetch('/api/status');
+  if (!res.ok) throw new Error('status request failed');
   return res.json();
 }

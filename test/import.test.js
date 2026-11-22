@@ -10,9 +10,9 @@ const collect = async (gen) => { const out = []; for await (const r of gen) out.
 test('detectFormat checks the extension and the file content', () => {
   assert.strictEqual(detectFormat('ATP.CSV', fixture('sample.csv')), 'csv');
   assert.strictEqual(detectFormat('ATP.xlsx', fixture('sample.xlsx')), 'xlsx');
-  assert.throws(() => detectFormat('notes.txt', Buffer.from('a,b')), ImportError);
-  assert.throws(() => detectFormat('fake.xlsx', Buffer.from('a,b,c')), /invalide/);
-  assert.throws(() => detectFormat('fake.csv', fixture('sample.xlsx')), /binaire/);
+  assert.throws(() => detectFormat('notes.txt', Buffer.from('a,b')), (e) => e instanceof ImportError && e.code === 'UNSUPPORTED_FORMAT');
+  assert.throws(() => detectFormat('fake.xlsx', Buffer.from('a,b,c')), (e) => e.code === 'INVALID_XLSX');
+  assert.throws(() => detectFormat('fake.csv', fixture('sample.xlsx')), (e) => e.code === 'BINARY_CSV');
 });
 
 test('csv: reads rows, strips the BOM from the first header', async () => {
@@ -30,12 +30,12 @@ test('xlsx: reads rows, skips blank rows, matches the csv result', async () => {
 });
 
 test('files without the required columns are rejected with a clear message', async () => {
-  await assert.rejects(collect(rowsFromXlsx(fixture('missing-columns.xlsx'))), /Colonnes manquantes.*Material Number ID/);
+  await assert.rejects(collect(rowsFromXlsx(fixture('missing-columns.xlsx'))), (e) => e.code === 'MISSING_COLUMNS' && /Material Number ID/.test(e.params.columns));
   await assert.rejects(collect(rowsFromCsv(Buffer.from('Style,Plant\nX,Y\n'))), /Colonnes manquantes/);
 });
 
 test('empty files are rejected', async () => {
-  await assert.rejects(collect(rowsFromCsv(Buffer.from(''))), /aucune ligne/);
+  await assert.rejects(collect(rowsFromCsv(Buffer.from(''))), (e) => e.code === 'EMPTY_FILE');
 });
 
 test('corrupt xlsx is reported as an ImportError, not a crash', async () => {

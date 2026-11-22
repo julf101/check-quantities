@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { COLOR_FAMILIES, FACET_KEYS, FACET_LABELS, GENDERS, isLetterSize, valueLabel } from '../utils.js';
+import { COLOR_FAMILIES, FACET_KEYS, GENDERS, isLetterSize, valueLabel } from '../utils.js';
+import { useI18n } from '../i18n/index.jsx';
 
 const pill = (active, disabled) =>
   `px-3 py-1.5 rounded-full text-sm border transition ${
@@ -45,6 +46,8 @@ function Dropdown({ label, entries, selected = [], onToggle, format }) {
 }
 
 export default function FilterBar({ facets, selected, currentSeasons = [], onToggle, onReplace, onClear }) {
+  const i18n = useI18n();
+  const { t } = i18n;
   const [mobileOpen, setMobileOpen] = useState(false);
   const f = (key) => facets?.[key] || [];
   const sel = (key) => selected[key] || [];
@@ -59,14 +62,14 @@ export default function FilterBar({ facets, selected, currentSeasons = [], onTog
   const colorEntries = f('color');
 
   return (
-    <section aria-label="Filtres" className="mb-6">
+    <section aria-label={t('filters.title')} className="mb-6">
       <button
         type="button"
         onClick={() => setMobileOpen(!mobileOpen)}
         aria-expanded={mobileOpen}
         className="md:hidden w-full mb-3 px-4 py-2 bg-white border rounded-lg text-left"
       >
-        Filtres{activeCount > 0 && ` (${activeCount})`} {mobileOpen ? '▴' : '▾'}
+        {t('filters.title')}{activeCount > 0 && ` (${activeCount})`} {mobileOpen ? '▴' : '▾'}
       </button>
 
       <div className={`${mobileOpen ? 'block' : 'hidden'} md:block space-y-3`}>
@@ -74,13 +77,13 @@ export default function FilterBar({ facets, selected, currentSeasons = [], onTog
         <div className="flex flex-wrap items-center gap-2">
           {GENDERS.map((g) => (
             <button
-              key={g.value}
+              key={g}
               type="button"
-              aria-pressed={sel('gender').includes(g.value)}
-              onClick={() => onToggle('gender', g.value)}
-              className={pill(sel('gender').includes(g.value), genderCount(g.value) === 0 && !sel('gender').includes(g.value))}
+              aria-pressed={sel('gender').includes(g)}
+              onClick={() => onToggle('gender', g)}
+              className={pill(sel('gender').includes(g), genderCount(g) === 0 && !sel('gender').includes(g))}
             >
-              {g.label} <span className="opacity-60">{genderCount(g.value)}</span>
+              {valueLabel('gender', g, i18n)} <span className="opacity-60">{genderCount(g)}</span>
             </button>
           ))}
           <span className="w-px h-6 bg-gray-300 mx-1" aria-hidden="true" />
@@ -91,7 +94,7 @@ export default function FilterBar({ facets, selected, currentSeasons = [], onTog
             title={currentSeasons.join(', ')}
             className={pill(currentOn, currentSeasons.length === 0)}
           >
-            Saisons actuelles
+            {t('filters.currentSeasons')}
           </button>
         </div>
 
@@ -100,39 +103,40 @@ export default function FilterBar({ facets, selected, currentSeasons = [], onTog
           {['categoryGroup', 'category', 'season', 'collection'].map((key) => (
             <Dropdown
               key={key}
-              label={FACET_LABELS[key]}
+              label={t(`filter.${key}`)}
               entries={f(key)}
               selected={sel(key)}
               onToggle={(v) => onToggle(key, v)}
-              format={(v) => valueLabel(key, v)}
+              format={(v) => valueLabel(key, v, i18n)}
             />
           ))}
           <Dropdown
-            label="Pointure"
+            label={t('filter.footwearSize')}
             entries={otherSizes}
             selected={sel('size').filter((v) => !isLetterSize(v))}
             onToggle={(v) => onToggle('size', v)}
-            format={(v) => valueLabel('size', v)}
+            format={(v) => valueLabel('size', v, i18n)}
           />
         </div>
 
         {/* colors */}
         {colorEntries.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Couleur">
-            <span className="text-sm text-gray-600 mr-1">Couleur</span>
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('filter.color')}>
+            <span className="text-sm text-gray-600 mr-1">{t('filter.color')}</span>
             {colorEntries.map(({ value, count }) => {
-              const fam = COLOR_FAMILIES[value] || COLOR_FAMILIES.OTHER;
+              const hex = COLOR_FAMILIES[value] || COLOR_FAMILIES.OTHER;
+              const name = valueLabel('color', value, i18n);
               const on = sel('color').includes(value);
               return (
                 <button
                   key={value}
                   type="button"
                   aria-pressed={on}
-                  aria-label={`${fam.label} (${count})`}
-                  title={`${fam.label} (${count})`}
+                  aria-label={`${name} (${count})`}
+                  title={`${name} (${count})`}
                   onClick={() => onToggle('color', value)}
                   className={`w-7 h-7 rounded-full border ${on ? 'ring-2 ring-offset-2 ring-blue-500' : ''}`}
-                  style={{ backgroundColor: fam.hex }}
+                  style={{ backgroundColor: hex }}
                 />
               );
             })}
@@ -141,8 +145,8 @@ export default function FilterBar({ facets, selected, currentSeasons = [], onTog
 
         {/* sizes */}
         {letterSizes.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Taille">
-            <span className="text-sm text-gray-600 mr-1">Taille</span>
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('filter.size')}>
+            <span className="text-sm text-gray-600 mr-1">{t('filter.size')}</span>
             {letterSizes.map(({ value, count }) => (
               <button
                 key={value}
@@ -160,22 +164,22 @@ export default function FilterBar({ facets, selected, currentSeasons = [], onTog
 
         {/* active filters */}
         {activeCount > 0 && (
-          <div className="flex flex-wrap items-center gap-2 pt-1" aria-label="Filtres actifs">
+          <div className="flex flex-wrap items-center gap-2 pt-1" aria-label={t('filters.active')}>
             {FACET_KEYS.flatMap((key) =>
               sel(key).map((value) => (
                 <button
                   key={`${key}:${value}`}
                   type="button"
                   onClick={() => onToggle(key, value)}
-                  aria-label={`Retirer ${valueLabel(key, value)}`}
+                  aria-label={t('filters.remove', { value: valueLabel(key, value, i18n) })}
                   className="px-2.5 py-1 text-xs rounded-full bg-blue-50 border border-blue-200 text-blue-800 hover:bg-blue-100"
                 >
-                  {valueLabel(key, value)} ×
+                  {valueLabel(key, value, i18n)} ×
                 </button>
               ))
             )}
             <button type="button" onClick={onClear} className="text-sm text-blue-600 hover:underline">
-              Tout réinitialiser
+              {t('filters.reset')}
             </button>
           </div>
         )}

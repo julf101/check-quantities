@@ -23,10 +23,4 @@ describe('utils', () => {
       'https://assets.thenorthface.eu/images/t_img/c_fill,f_auto,w_300/NF0A8C9ESE7-HERO/x.jpg'
     );
   });
-
-  it('spells out the season codes', () => {
-    expect(seasonName('FW27')).toBe('FW27 · Automne/Hiver 2027');
-    expect(seasonName('SS26')).toBe('SS26 · Printemps/Été 2026');
-    expect(seasonName('weird')).toBe('weird');
-  });
 });
