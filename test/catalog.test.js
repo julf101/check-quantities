@@ -39,6 +39,7 @@ test('buildCatalog groups rows by model, color and size, summing duplicates', ()
   const black = jacket.colors.find((c) => c.code === 'NF0A8D1TJK31');
   assert.deepStrictEqual(black.sizes.map((s) => [s.size, s.quantity]), [['M', 7], ['XL', 4]]);
   assert.strictEqual(black.imageCode, 'NF0A8D1TJK3-HERO');
+  assert.strictEqual(black.nrf, '001 - BLACK'); // the full text is kept for copying
   assert.strictEqual(jacket.categoryGroup, 'Apparel');
   assert.strictEqual(jacket.category, 'Outerwear');
   assert.strictEqual(jacket.gender, 'Mens');
