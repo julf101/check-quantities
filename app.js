@@ -1,42 +1,40 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const stockRoutes = require('./routes/stockRoutes');
+const catalogRoutes = require('./routes/catalogRoutes');
+const importRoutes = require('./routes/importRoutes');
+const { markStaleRunsFailed } = require('./services/importService');
 const errorHandler = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
 const { connectToDatabase } = require('./config/database');
 
 const app = express();
 
-console.log('Starting application...');
-
-// Middleware
 app.disable('x-powered-by');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
 
-// View engine setup
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+// API
+app.use('/api', catalogRoutes);
+app.use('/api', importRoutes);
+app.use('/api', (req, res) => res.status(404).json({ error: 'NOT_FOUND' }));
 
-// Routes
-app.use('/', stockRoutes);
+// Front end (built by `npm run build`)
+const dist = path.join(__dirname, 'dist');
+app.use(express.static(dist));
+app.get('*', (req, res) => res.sendFile(path.join(dist, 'index.html')));
 
-// Error handler (must be registered after the routes)
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
-// Function to start the server
 async function startServer() {
   try {
     await connectToDatabase();
-    app.listen(PORT, () => {
-      logger.info(`Server running on port ${PORT}`);
-    });
+    await markStaleRunsFailed();
+    app.listen(PORT, () => logger.info(`Server running on port ${PORT}`));
   } catch (error) {
-    console.error('Failed to start server:', error);
+    logger.error('Failed to start server:', error);
     process.exit(1);
   }
 }
