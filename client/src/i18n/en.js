@@ -7,6 +7,7 @@ export default {
 
   'catalog.search': 'Search',
   'catalog.searchPlaceholder': 'Search a name, a code (NF0A…), a colour — or paste a product URL',
+  'catalog.searchHint': "Tip: copy the URL of an article from The North Face shop and paste it here to find it.",
   'catalog.count': '{count} items',
   'catalog.count_one': '{count} item',
   'catalog.empty': 'No items match these criteria.',

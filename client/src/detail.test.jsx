@@ -32,17 +32,26 @@ describe('ProductDetail copy button', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Copier toutes les informations de NF0A8CV0S9B1003 (JSON)' }));
     await waitFor(() => expect(writeText).toHaveBeenCalledTimes(1));
     expect(JSON.parse(writeText.mock.calls[0][0])).toEqual({
-      name: 'KID PERF FLEECE SET PRIMROSE/FERMEN, 7',
-      articleNumber: 'NF0A8CV0S9B1003',
-      size: '7',
-      color: '660 - MEDIUM PINK',
-      quantity: 12,
-      model: 'NF0A8CV0',
-      modelName: 'KID PERF FLEECE SET',
-      season: 'FW26',
-      gender: 'Kids',
-      category: 'Bottom'
+      articleName: 'KID PERF FLEECE SET',
+      articleCode: 'NF0A8CV0S9B1003',
+      articleColour: '660 - MEDIUM PINK',
+      articleSize: '7'
     });
+  });
+
+  it('adds the shop URL when the user searched with a URL of this model', async () => {
+    const url = 'https://www.thenorthface.ch/fr-ch/p/enfant-1/set-NF0A8CV0?color=S9B';
+    render(<I18nProvider initial="fr"><ProductDetail code="NF0A8CV0" productUrl={url} onClose={() => {}} /></I18nProvider>);
+    fireEvent.click(await screen.findByRole('button', { name: /NF0A8CV0S9B1003/ }));
+    await waitFor(() => expect(writeText).toHaveBeenCalled());
+    expect(JSON.parse(writeText.mock.calls[0][0]).articleUrl).toBe(url);
+  });
+
+  it('ignores a pasted URL that belongs to another model', async () => {
+    render(<I18nProvider initial="fr"><ProductDetail code="NF0A8CV0" productUrl="https://x.ch/p/y-NF0A87ZK?color=5NO" onClose={() => {}} /></I18nProvider>);
+    fireEvent.click(await screen.findByRole('button', { name: /NF0A8CV0S9B1003/ }));
+    await waitFor(() => expect(writeText).toHaveBeenCalled());
+    expect(JSON.parse(writeText.mock.calls[0][0])).not.toHaveProperty('articleUrl');
   });
 
   it('copies the data of the colour that is displayed', async () => {
@@ -51,7 +60,7 @@ describe('ProductDetail copy button', () => {
     fireEvent.click(screen.getByRole('button', { name: /NF0A8CV0RC71004/ }));
     await waitFor(() => expect(writeText).toHaveBeenCalled());
     const json = JSON.parse(writeText.mock.calls[0][0]);
-    expect(json).toMatchObject({ articleNumber: 'NF0A8CV0RC71004', color: '430 - BRIGHT BLUE', size: 'M', quantity: 12 });
+    expect(json).toMatchObject({ articleCode: 'NF0A8CV0RC71004', articleColour: '430 - BRIGHT BLUE', articleSize: 'M' });
   });
 
   it('falls back to the short colour name when the full text is missing', async () => {
@@ -59,7 +68,7 @@ describe('ProductDetail copy button', () => {
     open();
     fireEvent.click(await screen.findByRole('button', { name: /NF0A8CV0S9B1003/ }));
     await waitFor(() => expect(writeText).toHaveBeenCalled());
-    expect(JSON.parse(writeText.mock.calls[0][0]).color).toBe('MEDIUM PINK');
+    expect(JSON.parse(writeText.mock.calls[0][0]).articleColour).toBe('MEDIUM PINK');
     model.colors[0].nrf = '660 - MEDIUM PINK';
   });
 

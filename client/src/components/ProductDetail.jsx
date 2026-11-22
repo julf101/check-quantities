@@ -21,7 +21,7 @@ export function CopyButton({ text, label, title }) {
   );
 }
 
-export default function ProductDetail({ code, focus = {}, onClose }) {
+export default function ProductDetail({ code, focus = {}, productUrl = null, onClose }) {
   const i18n = useI18n();
   const { t } = i18n;
   const [model, setModel] = useState(null);
@@ -45,18 +45,17 @@ export default function ProductDetail({ code, focus = {}, onClose }) {
   const color = model?.colors.find((c) => c.code === colorCode);
 
   /** Everything about one size, copied as JSON so it can be pasted into any system. */
-  const copyPayload = (size) => JSON.stringify({
-    name: size.materialNumberText,
-    articleNumber: size.materialNumberId,
-    size: size.size,
-    color: color.nrf || color.label,
-    quantity: size.quantity,
-    model: model.code,
-    modelName: model.name,
-    season: model.season,
-    gender: model.gender,
-    category: model.category
-  }, null, 2);
+  const copyPayload = (size) => {
+    const payload = {
+      articleName: model.name,
+      articleCode: size.materialNumberId,
+      articleColour: color.nrf || color.label,
+      articleSize: size.size
+    };
+    // only add the shop link when the pasted URL is really about this model
+    if (productUrl && productUrl.includes(model.code)) payload.articleUrl = productUrl;
+    return JSON.stringify(payload, null, 2);
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 z-10 flex items-start justify-center overflow-y-auto p-4" onClick={onClose}>

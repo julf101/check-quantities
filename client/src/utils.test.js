@@ -1,4 +1,4 @@
-import { formatSize, normalizeQuery, imageUrl, seasonName } from './utils.js';
+import { formatSize, normalizeQuery, pastedProductUrl, imageUrl, seasonName } from './utils.js';
 
 describe('utils', () => {
   it('formats numeric footwear sizes as US sizes and leaves others alone', () => {
@@ -22,5 +22,13 @@ describe('utils', () => {
     expect(imageUrl('NF0A8C9ESE7-HERO', 300)).toBe(
       'https://assets.thenorthface.eu/images/t_img/c_fill,f_auto,w_300/NF0A8C9ESE7-HERO/x.jpg'
     );
+  });
+});
+
+describe('pastedProductUrl', () => {
+  it('returns the trimmed URL for a product link, null otherwise', () => {
+    expect(pastedProductUrl(' https://www.thenorthface.ch/fr-ch/p/x-1/veste-NF0A87ZK?color=5NO ')).toBe('https://www.thenorthface.ch/fr-ch/p/x-1/veste-NF0A87ZK?color=5NO');
+    expect(pastedProductUrl('NF0A87ZK')).toBeNull();
+    expect(pastedProductUrl('https://example.com/nothing')).toBeNull();
   });
 });

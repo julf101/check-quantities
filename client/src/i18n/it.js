@@ -7,6 +7,7 @@ export default {
 
   'catalog.search': 'Ricerca',
   'catalog.searchPlaceholder': 'Cerca un nome, un codice (NF0A…), un colore — o incolla un URL prodotto',
+  'catalog.searchHint': "Suggerimento: copia l'URL di un articolo dal negozio The North Face e incollalo qui per trovarlo.",
   'catalog.count': '{count} articoli',
   'catalog.count_one': '{count} articolo',
   'catalog.empty': 'Nessun articolo corrisponde a questi criteri.',

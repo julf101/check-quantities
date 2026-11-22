@@ -11,6 +11,12 @@ export function normalizeQuery(text) {
   return /^https?:\/\//i.test((text || '').trim()) && m ? m[0] : (text || '');
 }
 
+/** The pasted shop URL (trimmed) if the text is a product URL that contains a model code, else null. */
+export function pastedProductUrl(text) {
+  const url = (text || '').trim();
+  return /^https?:\/\//i.test(url) && /NF0[0A][A-Z0-9]{4}/.test(url) ? url : null;
+}
+
 export const IMAGE_BASE = 'https://assets.thenorthface.eu/images/t_img';
 export function imageUrl(imageCode, width) {
   return `${IMAGE_BASE}/c_fill,f_auto,w_${width}/${imageCode}/x.jpg`;

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { fetchCatalog } from '../api.js';
-import { FACET_KEYS, normalizeQuery } from '../utils.js';
+import { FACET_KEYS, normalizeQuery, pastedProductUrl } from '../utils.js';
 import { useI18n } from '../i18n/index.jsx';
 import FilterBar from '../components/FilterBar.jsx';
 import ProductCard from '../components/ProductCard.jsx';
@@ -76,6 +76,7 @@ export default function Catalog() {
           aria-label={t('catalog.search')}
           className="flex-1 min-w-[16rem] p-3 border rounded-lg shadow-sm"
         />
+        <p className="basis-full text-xs text-gray-500 -mt-1">{t('catalog.searchHint')}</p>
         <select
           value={state.sort}
           onChange={(e) => setState((s) => ({ ...s, sort: e.target.value, page: 1 }))}
@@ -118,7 +119,7 @@ export default function Catalog() {
         )}
       </main>
 
-      {open && <ProductDetail code={open.code} focus={open.focus} onClose={() => setOpen(null)} />}
+      {open && <ProductDetail code={open.code} focus={open.focus} productUrl={pastedProductUrl(text)} onClose={() => setOpen(null)} />}
     </div>
   );
 }
